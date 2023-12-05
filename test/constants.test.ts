@@ -17,8 +17,8 @@ describe('constants', () => {
     expect(cn.READY2RUN_WORKFLOW_ID).toBeDefined()
   })
 
-  it('should have NOTIFICATION_EMAIL defined', () => {
-    expect(cn.NOTIFICATION_EMAIL).toBeDefined()
+  it('should have DEFAULT_EMAIL defined', () => {
+    expect(cn.DEFAULT_EMAIL).toBeDefined()
   })
 
   it('should have INPUT_BUCKET defined', () => {

@@ -6,8 +6,8 @@ export const AWS_REGION = process.env.CDK_DEFAULT_REGION ?? ''
 export const APP_NAME = process.env.CDK_APP_NAME ?? 'healthomics'
 export const READY2RUN_WORKFLOW_ID =
   process.env.READY2RUN_WORKFLOW_ID ?? '9500764'
-export const NOTIFICATION_EMAIL =
-  process.env.CDK_NOTIFICATION_EMAIL ?? 'test@example.com'
+export const DEFAULT_EMAIL =
+  process.env.CDK_DEFAULT_EMAIL ?? 'test@example.com'
 
 export const INPUT_BUCKET = `${APP_NAME}-cka-input-${AWS_ACCOUNT_ID}-${AWS_REGION}`
 export const OUTPUT_BUCKET = `${APP_NAME}-cka-output-${AWS_ACCOUNT_ID}-${AWS_REGION}`
