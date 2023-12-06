@@ -1,45 +1,45 @@
-import { Match, Template } from 'aws-cdk-lib/assertions'
-import { App } from 'aws-cdk-lib'
-import { OmicsQuiltStack } from '../src/main'
+import { App } from 'aws-cdk-lib';
+import { Match, Template } from 'aws-cdk-lib/assertions';
+import { OmicsQuiltStack } from '../src/main';
 
 describe('OmicsQuiltStack', () => {
   test('synthesizes the way we expect', () => {
-    const app = new App()
+    const app = new App();
 
     // Create the OmicsQuiltStack.
     const omicsWorkflowStack = new OmicsQuiltStack(
       app,
       'OmicsQuiltStack',
-      {}
-    )
+      {},
+    );
 
     // Prepare the stack for assertions.
-    const template = Template.fromStack(omicsWorkflowStack)
+    const template = Template.fromStack(omicsWorkflowStack);
 
     // Assert it creates the functiona with the correct properties...
     // TBD: can we verify it properly loaded the lambda code?
     template.hasResourceProperties('AWS::Lambda::Function', {
       Handler: 'index.handler',
-      Runtime: 'nodejs18.x'
-    })
+      Runtime: 'nodejs18.x',
+    });
 
     template.hasResourceProperties('AWS::Lambda::Function', {
       Handler: 'index.handler',
       Runtime: 'nodejs18.x',
       Code: {
         S3Bucket: {
-          'Fn::Sub': Match.stringLikeRegexp('.*assets.*')
+          'Fn::Sub': Match.stringLikeRegexp('.*assets.*'),
         },
-        S3Key: Match.stringLikeRegexp('.*.zip')
+        S3Key: Match.stringLikeRegexp('.*.zip'),
       },
       Environment: {
         Variables: {
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-        }
-      }
-    })
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        },
+      },
+    });
 
-    template.resourceCountIs('AWS::SNS::Topic', 1)
+    template.resourceCountIs('AWS::SNS::Topic', 1);
     /*template.resourceCountIs('AWS::SNS::TopicPolicy', 1)
     template.hasResourceProperties('AWS::SNS::TopicPolicy',
       {
@@ -56,7 +56,7 @@ describe('OmicsQuiltStack', () => {
               },
             },
             {
-              
+
             }
           ],
           Version: '2012-10-17'
@@ -75,12 +75,12 @@ describe('OmicsQuiltStack', () => {
               Action: 'sts:AssumeRole',
               Effect: 'Allow',
               Principal: {
-                Service: 'lambda.amazonaws.com'
-              }
-            }
-          ]
-        }
-      })
-    )
-  })
-})
+                Service: 'lambda.amazonaws.com',
+              },
+            },
+          ],
+        },
+      }),
+    );
+  });
+});
