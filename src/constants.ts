@@ -26,9 +26,10 @@ export type KeyedConfig = {
 export class Constants {
 
   public static DEFAULTS: { [key: string]: any } = {
-    APP_NAME: 'vivos',
+    APP_NAME: 'omics-quilt',
     BENCHLING_API_FILE: 'benchling.yaml',
     BENCHLING_API_URL: 'https://quilt-dtt.benchling.com/api/v2',
+    TEST_KEYED_FILE: './workflows/fastq/aws_region.json',
   };
 
   public static GET(key: string): any {
