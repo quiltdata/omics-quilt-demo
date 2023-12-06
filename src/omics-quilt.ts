@@ -18,13 +18,13 @@ import {
   BucketEncryption,
 } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
+import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { type Construct } from 'constructs';
 import { Constants } from './constants';
 
 export class OmicsQuiltStack extends Stack {
   public readonly inputBucket: Bucket;
   public readonly outputBucket: Bucket;
-  public readonly statusTopic: Topic;
 
   public readonly manifest_prefix: string;
   public readonly manifest_suffix: string;
@@ -46,17 +46,58 @@ export class OmicsQuiltStack extends Stack {
     this.inputBucket = this.makeBucket('input');
     this.outputBucket = this.makeBucket('output');
 
-    // SNS Topic for failure notifications
+    // SNS Topic for Workflow notifications
+    this.makeStatusNotifications(this.principal); // for debugging purposes
+
+    // Create an IAM service role for HealthOmics workflows
+    this.omicsRole = this.makeOmicsRole();
+
+    // Create an IAM role for the Lambda functions
+    this.lambdaRole = this.makeLambdaRole();
+
+    // Create Lambda function to submit initial HealthOmics workflow
+    const fastqLambda = this.makeLambda('fastq', {});
+    // Add S3 event source to Lambda
+    const fastqTrigger = new S3EventSource(this.inputBucket, {
+      events: [EventType.OBJECT_CREATED],
+      filters: [
+        { prefix: this.manifest_prefix, suffix: this.manifest_suffix },
+      ],
+    });
+    fastqLambda.addEventSource(fastqTrigger);
+  }
+
+  private makeStatusNotifications(principal: AccountPrincipal) {
     const topicName = `${this.cc.app}-status-topic`;
-    this.statusTopic = new Topic(this, topicName, {
+    const statusTopic = new Topic(this, topicName, {
       displayName: topicName,
       topicName: topicName,
     });
+    const email = this.cc.get('CDK_DEFAULT_EMAIL');
+    statusTopic.addSubscription(new EmailSubscription(email));
+    const servicePrincipal = new ServicePrincipal('events.amazonaws.com');
+    statusTopic.grantPublish(servicePrincipal);
+    statusTopic.grantPublish(principal);
 
-    // Create an EventBridge rule that sends SNS notification on failure
-    const ruleWorkflowStatusTopic = new Rule(
-      this,
-      `${topicName}-role`,
+    // Create EventBridge rule to detect Omics status changes
+    const omicsRule = this.makeOmicsRule(`${topicName}-omics-rule`);
+    omicsRule.addTarget(new SnsTopic(statusTopic));
+    // Create EventBridge rule to detect S3 bucket events
+    const inputBucketRule = this.makeBucketEventRule(
+      this.inputBucket,
+      `${topicName}-input-bucket-rule`,
+    );
+    inputBucketRule.addTarget(new SnsTopic(statusTopic));
+    const outputBucketRule = this.makeBucketEventRule(
+      this.outputBucket,
+      `${topicName}-output-bucket-rule`,
+    );
+    outputBucketRule.addTarget(new SnsTopic(statusTopic));
+    return statusTopic;
+  }
+
+  private makeOmicsRule(ruleName: string) {
+    const ruleOmics = new Rule(this, ruleName,
       {
         eventPattern: {
           source: ['aws.omics'],
@@ -67,30 +108,24 @@ export class OmicsQuiltStack extends Stack {
         },
       },
     );
+    return ruleOmics;
+  }
 
-    ruleWorkflowStatusTopic.addTarget(new SnsTopic(this.statusTopic));
-
-    const servicePrincipal = new ServicePrincipal('events.amazonaws.com');
-    this.statusTopic.grantPublish(servicePrincipal);
-    this.statusTopic.grantPublish(this.principal); // for debugging purposes
-
-    // Create an IAM service role for HealthOmics workflows
-    this.omicsRole = this.makeOmicsRole();
-
-    // Create an IAM role for the Lambda functions
-    this.lambdaRole = this.makeLambdaRole();
-
-    // Create Lambda function to submit initial HealthOmics workflow
-    const fastqWorkflowLambda = this.makeLambda('fastq', {});
-    // Add S3 event source to Lambda
-    fastqWorkflowLambda.addEventSource(
-      new S3EventSource(this.inputBucket, {
-        events: [EventType.OBJECT_CREATED],
-        filters: [
-          { prefix: this.manifest_prefix, suffix: this.manifest_suffix },
-        ],
-      }),
-    );
+  private makeBucketEventRule(bucket: Bucket, ruleName: string) {
+    const rule = new Rule(this, ruleName, {
+      eventPattern: {
+        source: ['aws.s3'],
+        detailType: ['AWS API Call via CloudTrail'],
+        detail: {
+          eventSource: ['s3.amazonaws.com'],
+          eventName: ['PutObject', 'CompleteMultipartUpload'],
+          requestParameters: {
+            bucketName: [bucket.bucketName],
+          },
+        },
+      },
+    });
+    return rule;
   }
 
   private makeBucket(type: string) {
