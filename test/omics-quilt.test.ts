@@ -10,7 +10,7 @@ describe('OmicsQuiltStack', () => {
     const omicsWorkflowStack = new OmicsQuiltStack(
       app,
       'OmicsQuiltStack',
-      {CDK_DEFAULT_REGION: 'us-east-1', CDK_DEFAULT_ACCOUNT: '123456789012'},
+      { CDK_DEFAULT_REGION: 'us-east-1', CDK_DEFAULT_ACCOUNT: '123456789012' },
     );
 
     // Prepare the stack for assertions.

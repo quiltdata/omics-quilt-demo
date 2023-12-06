@@ -39,7 +39,7 @@ export class OmicsQuiltStack extends Stack {
     this.cc = new Constants(env);
     this.principal = new AccountPrincipal(this.cc.account);
     const manifest_root = this.cc.get('MANIFEST_ROOT');
-    this.manifest_prefix = `${manifest_root}/${this.cc.region}`
+    this.manifest_prefix = `${manifest_root}/${this.cc.region}`;
     this.manifest_suffix = this.cc.get('MANIFEST_SUFFIX');
 
     // Create Input/Output S3 buckets
@@ -94,7 +94,7 @@ export class OmicsQuiltStack extends Stack {
   }
 
   private makeBucket(type: string) {
-    const name = this.cc.getBucketName(type)
+    const name = this.cc.getBucketName(type);
     const bucketOptions = {
       autoDeleteObjects: true,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
