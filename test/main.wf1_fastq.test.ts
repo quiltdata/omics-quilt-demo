@@ -2,7 +2,7 @@
 import {
   fastq_config_from_json,
   handler
-} from '../src/omics-workflow-stack.wf1_fastq'
+} from '../src/main.wf1_fastq'
 
 import { TEST_EVENT } from './fixture'
 
