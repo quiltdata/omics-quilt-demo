@@ -4,22 +4,6 @@ import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import handlebars from 'handlebars';
 import yaml from 'js-yaml';
 
-export const AWS_ACCOUNT_ID = process.env.CDK_DEFAULT_ACCOUNT ?? '';
-export const AWS_REGION = process.env.CDK_DEFAULT_REGION ?? '';
-
-export const APP_NAME = process.env.CDK_APP_NAME ?? 'healthomics';
-export const READY2RUN_WORKFLOW_ID =
-  process.env.READY2RUN_WORKFLOW_ID ?? '9500764';
-export const DEFAULT_EMAIL =
-  process.env.CDK_DEFAULT_EMAIL ?? 'test@example.com';
-
-export const INPUT_BUCKET = `${APP_NAME}-cka-input-${AWS_ACCOUNT_ID}-${AWS_REGION}`;
-export const OUTPUT_BUCKET = `${APP_NAME}-cka-output-${AWS_ACCOUNT_ID}-${AWS_REGION}`;
-
-export const MANIFEST_ROOT = 'fastq';
-export const MANIFEST_PREFIX = `${MANIFEST_ROOT}/${AWS_REGION}`;
-export const MANIFEST_SUFFIX = '.json';
-
 export type KeyedConfig = {
   [key: string]: any;
 };
@@ -29,7 +13,11 @@ export class Constants {
     APP_NAME: 'omics-quilt',
     BENCHLING_API_FILE: 'benchling.yaml',
     BENCHLING_API_URL: 'https://quilt-dtt.benchling.com/api/v2',
+    CDK_DEFAULT_EMAIL: 'test@example.com',
     TEST_KEYED_FILE: './workflows/fastq/aws_region.json',
+    READY2RUN_WORKFLOW_ID: '9500764',
+    MANIFEST_ROOT: 'fastq',
+    MANIFEST_SUFFIX: '.json',
   };
 
   public static GET(key: string): any {
@@ -144,12 +132,18 @@ export class Constants {
     }
   }
 
+  public readonly app: string;
+  public readonly account: string;
+  public readonly region: string;
   private context: any;
 
   constructor(context: any) {
     this.context = context;
     this.updateContext(process.env);
     this.updateContext(Constants.DEFAULTS);
+    this.app = this.get('APP_NAME');
+    this.account = this.get('CDK_DEFAULT_ACCOUNT') || this.get('AWS_ACCOUNT_ID');
+    this.region = this.get('CDK_DEFAULT_REGION') || this.get('AWS_REGION');
   }
 
   public updateContext(envs: KeyedConfig) {
@@ -176,10 +170,22 @@ export class Constants {
 
   public defaultProps(): KeyedConfig {
     return {
-      account: this.get('CDK_DEFAULT_ACCOUNT'),
-      region: this.get('CDK_DEFAULT_REGION'),
+      account: this.account,
+      region: this.region,
       email: this.get('CDK_DEFAULT_EMAIL'),
     };
+  }
+
+  public getAcctRegion(): string {
+    return `${this.region}:${this.account}`;
+  }
+
+  public getBucketName(type: string): string {
+    return `${this.app}-cka-${type}-${this.account}-${this.region}`;
+  }
+
+  public getEcrRegistry(): string {
+    return `${this.account}.dkr.ecr.${this.region}.amazonaws.com`;
   }
 }
 

@@ -19,16 +19,7 @@ import {
 } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { type Construct } from 'constructs';
-import {
-  APP_NAME,
-  AWS_ACCOUNT_ID,
-  AWS_REGION,
-  INPUT_BUCKET,
-  OUTPUT_BUCKET,
-  MANIFEST_PREFIX,
-  MANIFEST_SUFFIX,
-  READY2RUN_WORKFLOW_ID,
-} from './constants';
+import { Constants } from './constants';
 
 export class OmicsQuiltStack extends Stack {
   public readonly inputBucket: Bucket;
@@ -38,22 +29,25 @@ export class OmicsQuiltStack extends Stack {
   public readonly manifest_prefix: string;
   public readonly manifest_suffix: string;
 
+  readonly cc: Constants;
   readonly lambdaRole: Role;
   readonly omicsRole: Role;
   readonly principal: AccountPrincipal;
 
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, env = {}, props?: StackProps) {
     super(scope, id, props);
-    this.principal = new AccountPrincipal(AWS_ACCOUNT_ID);
-    this.manifest_prefix = MANIFEST_PREFIX;
-    this.manifest_suffix = MANIFEST_SUFFIX;
+    this.cc = new Constants(env);
+    this.principal = new AccountPrincipal(this.cc.account);
+    const manifest_root = this.cc.get('MANIFEST_ROOT');
+    this.manifest_prefix = `${manifest_root}/${this.cc.region}`
+    this.manifest_suffix = this.cc.get('MANIFEST_SUFFIX');
 
     // Create Input/Output S3 buckets
-    this.inputBucket = this.makeBucket(INPUT_BUCKET);
-    this.outputBucket = this.makeBucket(OUTPUT_BUCKET);
+    this.inputBucket = this.makeBucket('input');
+    this.outputBucket = this.makeBucket('output');
 
     // SNS Topic for failure notifications
-    const topicName = `${APP_NAME}_workflow_status_topic`;
+    const topicName = `${this.cc.app}_workflow_status_topic`;
     this.statusTopic = new Topic(this, topicName, {
       displayName: topicName,
       topicName: topicName,
@@ -62,7 +56,7 @@ export class OmicsQuiltStack extends Stack {
     // Create an EventBridge rule that sends SNS notification on failure
     const ruleWorkflowStatusTopic = new Rule(
       this,
-      `${APP_NAME}_rule_workflow_status_topic`,
+      `${this.cc.app}_rule_workflow_status_topic`,
       {
         eventPattern: {
           source: ['aws.omics'],
@@ -99,7 +93,8 @@ export class OmicsQuiltStack extends Stack {
     );
   }
 
-  private makeBucket(name: string) {
+  private makeBucket(type: string) {
+    const name = this.cc.getBucketName(type)
     const bucketOptions = {
       autoDeleteObjects: true,
       blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
@@ -118,9 +113,8 @@ export class OmicsQuiltStack extends Stack {
     const default_env = {
       OMICS_ROLE: this.omicsRole.roleArn,
       OUTPUT_S3_LOCATION: 's3://' + this.outputBucket.bucketName + '/outputs',
-      WORKFLOW_ID: READY2RUN_WORKFLOW_ID,
-      ECR_REGISTRY:
-        AWS_ACCOUNT_ID + '.dkr.ecr.' + AWS_REGION + '.amazonaws.com',
+      WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),
+      ECR_REGISTRY: this.cc.getEcrRegistry(),
       LOG_LEVEL: 'ALL',
     };
     // create merged env
@@ -135,7 +129,7 @@ export class OmicsQuiltStack extends Stack {
   }
 
   private makeLambdaRole() {
-    const lambdaRole = new Role(this, `${APP_NAME}-lambda-role`, {
+    const lambdaRole = new Role(this, `${this.cc.app}-lambda-role`, {
       assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
       managedPolicies: [
         ManagedPolicy.fromAwsManagedPolicyName(
@@ -171,7 +165,7 @@ export class OmicsQuiltStack extends Stack {
   }
 
   private makeOmicsRole() {
-    const omicsRole = new Role(this, `${APP_NAME}-omics-service-role`, {
+    const omicsRole = new Role(this, `${this.cc.app}-omics-service-role`, {
       assumedBy: new ServicePrincipal('omics.amazonaws.com'),
     });
 
@@ -204,7 +198,7 @@ export class OmicsQuiltStack extends Stack {
         'ecr:GetDownloadUrlForLayer',
         'ecr:BatchCheckLayerAvailability',
       ],
-      resources: [`arn:aws:ecr:${AWS_REGION}:${AWS_ACCOUNT_ID}:repository/*`],
+      resources: [`arn:aws:ecr:${this.cc.getAcctRegion()}:repository/*`],
     });
     omicsRole.addToPolicy(omicsEcrPolicy);
 
@@ -217,8 +211,8 @@ export class OmicsQuiltStack extends Stack {
         'logs:PutLogEvents',
       ],
       resources: [
-        `arn:aws:logs:${AWS_REGION}:${AWS_ACCOUNT_ID}:log-group:/aws/omics/WorkflowLog:log-stream:*`,
-        `arn:aws:logs:${AWS_REGION}:${AWS_ACCOUNT_ID}:log-group:/aws/omics/WorkflowLog:*`,
+        `arn:aws:logs:${this.cc.getAcctRegion()}:log-group:/aws/omics/WorkflowLog:log-stream:*`,
+        `arn:aws:logs:${this.cc.getAcctRegion() }:log-group:/aws/omics/WorkflowLog:*`,
       ],
     });
     omicsRole.addToPolicy(omicsLoggingPolicy);
@@ -231,6 +225,7 @@ export class OmicsQuiltStack extends Stack {
     omicsRole.addToPolicy(omicsKmsPolicy);
 
     // Allow Omics service role to access some common public AWS S3 buckets with test data
+    const AWS_REGION = this.cc.get('AWS_REGION');
     const omicsRoleAdditionalPolicy = new PolicyStatement({
       actions: ['s3:Get*', 's3:List*'],
       resources: [
