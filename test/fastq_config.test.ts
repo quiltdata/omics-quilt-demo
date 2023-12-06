@@ -1,14 +1,14 @@
 import * as fs from 'fs';
-import { regionalManifest } from '../src/region';
+import { fastqConfig } from '../src/fastq_config';
 
-describe('regionalManifest', () => {
+describe('fastqConfig', () => {
   it('should return the correct regional manifest', () => {
     const region = 'us-test-0';
     const timestamp = '2020-01-01T00:00:00.000Z';
     const expected_folder = `workflows/fastq/${region}`;
     const expected_file = `${expected_folder}/${region}.json`;
 
-    const result_folder = regionalManifest(region, timestamp);
+    const result_folder = fastqConfig(region, timestamp);
     expect(result_folder).toContain(expected_folder);
 
     const result_file = `${result_folder}/${region}.json`;
