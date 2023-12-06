@@ -1,0 +1,37 @@
+{
+    "Records": [
+        {
+            "eventVersion": "0.0",
+            "eventSource": "aws:s3",
+            "awsRegion": "us-west-2",
+            "eventTime": "2023-11-30T13:49:41.540Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+            },
+            "requestParameters": {
+                "sourceIPAddress": "54.191.133.226"
+            },
+            "responseElements": {
+                "x-amz-request-id": "9EEEGWNDRJC310ZQ",
+                "x-amz-id-2": "2RcPQ5dSh2L6o3g7IzqOuex/fmpyu3ZLpGhLh5IB/1PIMEK/qK6NXIE2ss8JfWyQSUBMdC0MQ6+1wBLXP/RRrX6jSbrLCwTB"
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "arn:aws:cloudformation:us-west-2:850787717197:stack/vivos-dev/b4c795d0-8d90-11ee-a3be-026280702b43-4041400875903124910",
+                "bucket": {
+                    "name": "nf-core-gallery",
+                    "ownerIdentity": {
+                    },
+                    "arn": "arn:aws:s3:::nf-core-gallery"
+                },
+                "object": {
+                    "key": "benchling/EXP23000052/entry.json",
+                    "size": 2331,
+                    "eTag": "8fc48a585d1c72b07c2449eb0a09eba7",
+                    "versionId": "bBM8dgjKkP5.mqoGHP1x1vqCexpW0.DW",
+                    "sequencer": "00656892F5816E21A4"
+                }
+            }
+        }
+    ]
+}

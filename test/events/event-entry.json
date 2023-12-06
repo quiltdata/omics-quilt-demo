@@ -1,0 +1,24 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.2",
+            "eventSource": "aws:s3",
+            "awsRegion": "us-west-2",
+            "eventTime": "1970-01-01T00:00:00.000Z",
+            "eventName": "event-type",
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "bucket": {
+                    "name": "nf-core-gallery",
+                    "arn": "bucket-ARN"
+                },
+                "object": {
+                    "key": "benchling/EXP23000052/entry.json",
+                    "size": 12345,
+                    "eTag": "object-eTag",
+                    "versionId": "object-version-id"
+                }
+            }
+        }
+    ]
+}
