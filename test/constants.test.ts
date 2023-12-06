@@ -31,7 +31,7 @@ describe('Constants', () => {
       expect(result).toBeDefined();
       expect(result).toHaveProperty('id');
     });
-     it('should throw an error if the object URI is invalid', async () => {
+    it('should throw an error if the object URI is invalid', async () => {
       const nonExistentURI = 'https://quilt-example.com';
       await expect(Constants.LoadObjectURI(nonExistentURI)).rejects.toThrow();
     });

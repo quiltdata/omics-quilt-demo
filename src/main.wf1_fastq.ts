@@ -1,18 +1,18 @@
-import { Constants } from './constants';
 
 import { createWriteStream, readFile } from 'fs';
 import { promisify } from 'util';
 import {
-  GetObjectCommand,
-} from '@aws-sdk/client-s3';
-import { 
   OmicsClient,
   RunLogLevel,
   StartRunCommand,
   StartRunCommandInput,
-  WorkflowType 
+  WorkflowType,
 } from '@aws-sdk/client-omics';
+import {
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
+import { Constants } from './constants';
 
 const OUTPUT_S3_LOCATION = process.env.OUTPUT_S3_LOCATION!;
 const OMICS_ROLE = process.env.OMICS_ROLE!;
@@ -28,7 +28,7 @@ async function download_s3_file(
     Bucket: bucket,
     Key: key,
   });
-  const s3Client = Constants.DefaultS3()
+  const s3Client = Constants.DefaultS3();
   const writer = createWriteStream(local_file);
   const extension = local_file.split('.').pop()?.toLowerCase();
 
@@ -145,7 +145,7 @@ async function run_workflow(
       RUN_NAME: run_name,
       SAMPLE_MANIFEST: `s3://${bucket_name}/${filename}`,
     },
-    requestId: uuid
+    requestId: uuid,
   };
   try {
     console.debug(`Workflow options: ${JSON.stringify(options)}`);
