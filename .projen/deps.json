@@ -67,6 +67,10 @@
       "type": "build"
     },
     {
+      "name": "@aws-sdk/client-omics",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-s3",
       "type": "runtime"
     },

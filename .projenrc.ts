@@ -9,6 +9,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'aws-lambda',
     '@aws-sdk/client-s3',
     '@aws-sdk/client-sns',
+    '@aws-sdk/client-omics',
     'dotenv',
     'handlebars',
     'js-yaml',

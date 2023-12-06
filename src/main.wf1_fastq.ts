@@ -1,6 +1,17 @@
+import { Constants } from './constants';
+
 import { createWriteStream, readFile } from 'fs';
 import { promisify } from 'util';
-import { Omics, S3 } from 'aws-sdk';
+import {
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
+import { 
+  OmicsClient,
+  RunLogLevel,
+  StartRunCommand,
+  StartRunCommandInput,
+  WorkflowType 
+} from '@aws-sdk/client-omics';
 import { v4 as uuidv4 } from 'uuid';
 
 const OUTPUT_S3_LOCATION = process.env.OUTPUT_S3_LOCATION!;
@@ -10,21 +21,22 @@ const LOG_LEVEL = process.env.LOG_LEVEL!;
 
 async function download_s3_file(
   bucket: string,
-  _key: string,
+  key: string,
   local_file: string,
 ) {
-  const s3 = new S3();
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: key,
+  });
+  const s3Client = Constants.DefaultS3()
+  const writer = createWriteStream(local_file);
+  const extension = local_file.split('.').pop()?.toLowerCase();
 
   try {
-    const file = createWriteStream(local_file);
-    const stream = s3
-      .getObject({ Bucket: bucket, Key: _key })
-      .createReadStream();
-    stream.pipe(file);
-    await new Promise((resolve, reject) => {
-      file.on('finish', resolve);
-      file.on('error', reject);
-    });
+    const response = await s3Client.send(command);
+    const contents = await response.Body!.transformToString();
+    const data = Constants.LoadObjectData(contents, extension!);
+    writer.write(data);
   } catch (e: any) {
     if (e.code === 'NoSuchKey') {
       console.error('The object does not exist.');
@@ -32,6 +44,13 @@ async function download_s3_file(
       throw e;
     }
   }
+}
+
+async function start_omics_run(options: StartRunCommandInput) {
+  const omicsClient = new OmicsClient();
+  const command = new StartRunCommand(options);
+  const response = await omicsClient.send(command);
+  return response;
 }
 
 export async function fastq_config_from_json(manifest_json_file: string) {
@@ -110,29 +129,31 @@ async function run_workflow(
 ) {
   const _samplename = _item.sample_name;
   console.info(`Starting workflow for sample: ${_samplename}`);
-  const run_name = `Sample_${_samplename}_` + uuidv4();
+  const uuid = uuidv4();
+  const run_name = `Sample_${_samplename}_${uuid}`;
+  const workflow_type = 'READY2RUN' as WorkflowType;
+  const options = {
+    workflowType: workflow_type,
+    workflowId: WORKFLOW_ID,
+    name: run_name,
+    roleArn: OMICS_ROLE,
+    parameters: _item,
+    logLevel: LOG_LEVEL as RunLogLevel,
+    outputUri: OUTPUT_S3_LOCATION,
+    tags: {
+      SOURCE: 'LAMBDA_WF1_FASTQ',
+      RUN_NAME: run_name,
+      SAMPLE_MANIFEST: `s3://${bucket_name}/${filename}`,
+    },
+    requestId: uuid
+  };
   try {
-    const options = {
-      workflowType: 'READY2RUN',
-      workflowId: WORKFLOW_ID,
-      name: run_name,
-      roleArn: OMICS_ROLE,
-      parameters: _item,
-      logLevel: LOG_LEVEL,
-      outputUri: OUTPUT_S3_LOCATION,
-      tags: {
-        SOURCE: 'LAMBDA_WF1_FASTQ',
-        RUN_NAME: run_name,
-        SAMPLE_MANIFEST: `s3://${bucket_name}/${filename}`,
-      },
-      requestId: uuidv4(), // add a unique requestId
-    };
     console.debug(`Workflow options: ${JSON.stringify(options)}`);
     if (context.debug) {
       console.info(`Skipping with context: ${JSON.stringify(context)}`);
     } else {
-      const omics = new Omics();
-      const response = await omics.startRun(options).promise();
+      const input: StartRunCommandInput = options;
+      const response = await start_omics_run(input);
       console.info(`Workflow response: ${JSON.stringify(response)}`);
     }
   } catch (e: any) {
