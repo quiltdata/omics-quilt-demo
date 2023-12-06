@@ -42,9 +42,9 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@aws-sdk/client-omics": "^3.465.0",
-    "@aws-sdk/client-s3": "^3.465.0",
-    "@aws-sdk/client-sns": "^3.465.0",
+    "@aws-sdk/client-omics": "^3.468.0",
+    "@aws-sdk/client-s3": "^3.468.0",
+    "@aws-sdk/client-sns": "^3.468.0",
     "@types/js-yaml": "^4.0.9",
     "@types/uuid": "^9.0.7",
     "aws-cdk-lib": "^2.1.0",
