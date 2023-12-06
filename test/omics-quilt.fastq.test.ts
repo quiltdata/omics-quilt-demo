@@ -3,7 +3,7 @@ import { TEST_EVENT } from './fixture';
 import {
   fastq_config_from_json,
   handler,
-} from '../src/main.wf1_fastq';
+} from '../src/omics-quilt.fastq';
 
 
 const CONTEXT = {

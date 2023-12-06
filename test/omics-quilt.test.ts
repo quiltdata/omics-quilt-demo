@@ -1,6 +1,6 @@
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { OmicsQuiltStack } from '../src/main';
+import { OmicsQuiltStack } from '../src/omics-quilt';
 
 describe('OmicsQuiltStack', () => {
   test('synthesizes the way we expect', () => {
