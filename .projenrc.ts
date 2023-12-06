@@ -12,6 +12,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'dotenv',
     'handlebars',
     'js-yaml',
+    'uuid',
+    '@types/uuid',
     '@types/js-yaml',
   ],
   devDeps: [
