@@ -1,0 +1,19 @@
+exclude: ".projen*|.git*|test/__*|benchling_packager.yaml"
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: bash -c "npm run eslint"
+        language: node
+        stages: [pre-push]

@@ -67,6 +67,10 @@
       "type": "build"
     },
     {
+      "name": "@aws-sdk/client-omics",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-s3",
       "type": "runtime"
     },
@@ -76,6 +80,10 @@
     },
     {
       "name": "@types/js-yaml",
+      "type": "runtime"
+    },
+    {
+      "name": "@types/uuid",
       "type": "runtime"
     },
     {
@@ -102,6 +110,10 @@
     },
     {
       "name": "js-yaml",
+      "type": "runtime"
+    },
+    {
+      "name": "uuid",
       "type": "runtime"
     }
   ],
