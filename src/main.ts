@@ -30,7 +30,7 @@ import {
   READY2RUN_WORKFLOW_ID
 } from './constants'
 
-export class OmicsWorkflowStack extends Stack {
+export class OmicsQuiltStack extends Stack {
   public readonly inputBucket: Bucket
   public readonly outputBucket: Bucket
   public readonly statusTopic: Topic

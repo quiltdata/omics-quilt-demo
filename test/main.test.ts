@@ -1,15 +1,15 @@
 import { Match, Template } from 'aws-cdk-lib/assertions'
 import { App } from 'aws-cdk-lib'
-import { OmicsWorkflowStack } from '../src/main'
+import { OmicsQuiltStack } from '../src/main'
 
-describe('OmicsWorkflowStack', () => {
+describe('OmicsQuiltStack', () => {
   test('synthesizes the way we expect', () => {
     const app = new App()
 
-    // Create the OmicsWorkflowStack.
-    const omicsWorkflowStack = new OmicsWorkflowStack(
+    // Create the OmicsQuiltStack.
+    const omicsWorkflowStack = new OmicsQuiltStack(
       app,
-      'OmicsWorkflowStack',
+      'OmicsQuiltStack',
       {}
     )
 
