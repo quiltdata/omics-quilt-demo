@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { fastqConfig } from '../src/fastq_config';
+import { fastqConfig } from '../src/fastq-config';
 
 describe('fastqConfig', () => {
   it('should return the correct regional manifest', () => {

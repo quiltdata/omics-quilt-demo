@@ -47,7 +47,7 @@ export class OmicsQuiltStack extends Stack {
     this.outputBucket = this.makeBucket('output');
 
     // SNS Topic for failure notifications
-    const topicName = `${this.cc.app}_workflow_status_topic`;
+    const topicName = `${this.cc.app}-status-topic`;
     this.statusTopic = new Topic(this, topicName, {
       displayName: topicName,
       topicName: topicName,
@@ -56,7 +56,7 @@ export class OmicsQuiltStack extends Stack {
     // Create an EventBridge rule that sends SNS notification on failure
     const ruleWorkflowStatusTopic = new Rule(
       this,
-      `${this.cc.app}_rule_workflow_status_topic`,
+      `${topicName}-role`,
       {
         eventPattern: {
           source: ['aws.omics'],
