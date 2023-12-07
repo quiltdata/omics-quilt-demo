@@ -67,10 +67,15 @@ export class Constants {
       Bucket: bucket,
       Key: key,
     });
-    const response = await s3.send(command);
-    const contents = await response.Body!.transformToString();
-    const extension = file.split('.').pop()?.toLowerCase();
-    return Constants.LoadObjectData(contents, extension!, env);
+    try {
+      const response = await s3.send(command);
+      const contents = await response.Body!.transformToString();
+      const extension = file.split('.').pop()?.toLowerCase();
+      return Constants.LoadObjectData(contents, extension!, env);
+    } catch (e: any) {
+      console.error(e);
+      throw e;
+    }
   }
 
   public static LoadObjectFile(filePath: string, env: object = {}): KeyedConfig {

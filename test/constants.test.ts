@@ -25,11 +25,12 @@ describe('Constants', () => {
     });
   });
   describe('LoadObjectURI', () => {
-    it('should load object URI correctly', async () => {
-      const uri = 's3://nf-core-gallery/benchling/EXP23000052/entry.json';
+    it('should load yaml URI correctly', async () => {
+      const uri = 's3://quilt-demo/examples/volcano-plot/Vega_volcano.json';  // TODO: per-region test buckets!
+      console.debug(`LoadObjectURI ${uri}`);
       const result = await Constants.LoadObjectURI(uri);
       expect(result).toBeDefined();
-      expect(result).toHaveProperty('id');
+      expect(result).toHaveProperty('data');
     });
     it('should throw an error if the object URI is invalid', async () => {
       const nonExistentURI = 'https://quilt-example.com';
