@@ -4,7 +4,7 @@ import { OmicsQuiltStack } from './omics-quilt';
 
 function main() {
   const app = new App();
-  const env = { CDK_DEFAULT_REGION: 'us-east-1' }
+  const env = { CDK_DEFAULT_REGION: 'us-east-1' };
   const cc = new Constants(env);
 
   new OmicsQuiltStack(app, cc.app, env);
