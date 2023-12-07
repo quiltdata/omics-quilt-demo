@@ -64,7 +64,7 @@ describe('Constants', () => {
     }
 
     it('should return the value for a given key path', () => {
-      checkKeyPathValue('0.platform', 'illumina');
+      checkKeyPathValue('platform', 'illumina');
     });
 
     it('should return undefined if the key path does not exist', () => {

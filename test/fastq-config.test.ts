@@ -3,7 +3,7 @@ import { fastqConfig } from '../src/fastq-config';
 
 describe('fastqConfig', () => {
   it('should return the correct regional manifest', () => {
-    const region = 'us-test-0';
+    const region = 'us-west-2';
     const timestamp = '2020-01-01T00:00:00.000Z';
     const expected_folder = `workflows/fastq/${region}`;
     const expected_file = `${expected_folder}/${region}.json`;
