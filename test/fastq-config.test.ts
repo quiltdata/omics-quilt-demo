@@ -1,13 +1,12 @@
 import * as fs from 'fs';
-import { fastqConfig } from '../src/fastq-config';
 import { Constants } from '../src/constants';
+import { fastqConfig } from '../src/fastq-config';
 
 describe('fastqConfig', () => {
   it('should create a config for the current region', () => {
-    const region = Constants.GET('CDK_DEFAULT_REGION');
+    const region = Constants.GetRegion();
     expect(region).toBeDefined();
-    expect(region).toEqual('us-east-1');
-    const timestamp = new Date().toISOString();
+    const timestamp = '2023-11-07T12:34:56.789Z';
     const expected_folder = `workflows/fastq/${region}`;
     const expected_file = `${expected_folder}/${region}.json`;
 

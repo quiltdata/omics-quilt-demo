@@ -6,6 +6,6 @@
     "fastq_2": "s3://aws-genomics-static-us-east-1/omics-tutorials/data/fastq/NA12878/Sample_U0a/U0a_CGATGT_L001_R2_001.fastq.gz",
     "platform": "illumina",
     "region": "us-east-1",
-    "timestamp": "2023-12-07T18:51:46.509Z"
+    "timestamp": "2023-11-07T12:34:56.789Z"
   }
 ]

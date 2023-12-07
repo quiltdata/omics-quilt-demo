@@ -24,9 +24,16 @@ describe('Constants', () => {
       expect(packageName).toEqual('GitHub/vivos');
     });
   });
+  describe('GetRegion', () => {
+    it('should return the region from the environment', () => {
+      const region = Constants.GetRegion();
+      expect(region).toEqual(constants.region);
+      expect(region).toEqual('us-east-1');
+    });
+  });
   describe('LoadObjectURI', () => {
     it('should load yaml URI correctly', async () => {
-      const uri = 's3://quilt-demo/examples/volcano-plot/Vega_volcano.json';  // TODO: per-region test buckets!
+      const uri = 's3://quilt-demo/examples/volcano-plot/Vega_volcano.json'; // TODO: per-region test buckets!
       console.debug(`LoadObjectURI ${uri}`);
       const result = await Constants.LoadObjectURI(uri);
       expect(result).toBeDefined();

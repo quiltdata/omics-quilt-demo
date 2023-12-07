@@ -1,16 +1,18 @@
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
+import { Constants } from '../src/constants';
 import { OmicsQuiltStack } from '../src/omics-quilt';
 
 describe('OmicsQuiltStack', () => {
   test('synthesizes the way we expect', () => {
     const app = new App();
+    const region = Constants.GetRegion();
 
     // Create the OmicsQuiltStack.
     const omicsWorkflowStack = new OmicsQuiltStack(
       app,
       'OmicsQuiltStack',
-      { CDK_DEFAULT_REGION: 'us-east-1', CDK_DEFAULT_ACCOUNT: '123456789012' },
+      { CDK_DEFAULT_REGION: region, CDK_DEFAULT_ACCOUNT: '123456789012' },
     );
 
     // Prepare the stack for assertions.
