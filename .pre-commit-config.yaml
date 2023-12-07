@@ -1,4 +1,4 @@
-exclude: ".projen*|.git*|test/__*|benchling_packager.yaml"
+exclude: ".projen*|.git*|test/__*|ts*|LICENSE|.npm*|cdk*"
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0

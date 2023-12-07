@@ -84,14 +84,19 @@ export class Constants {
       const template = handlebars.compile(data);
       data = template(env);
     }
+    var parsed: any;
 
     if (extension === 'yaml' || extension === 'yml') {
-      return yaml.load(data) as KeyedConfig;
+      parsed = yaml.load(data);
     } else if (extension === 'json') {
-      return JSON.parse(data);
+      parsed = JSON.parse(data);
     } else {
       throw new Error(`Unsupported file extension: ${extension}`);
     }
+    if (Array.isArray(parsed)) {
+      return parsed[0] as KeyedConfig;
+    }
+    return parsed as KeyedConfig;
   }
 
   public static async LoadPipeline(pipeline: string, env: any = {}) {

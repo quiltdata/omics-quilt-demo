@@ -1,23 +1,19 @@
 // import exp from 'constants'
 import { TEST_EVENT } from './fixture';
 import {
-  fastq_config_from_json,
+  fastq_config_from_uri,
   handler,
 } from '../src/omics-quilt.fastq';
 
 
 const CONTEXT = {
   debug: true,
-  local_file: 'workflows/fastq/aws_region.json',
+  local_file: './workflows/fastq/aws_region.json',
 };
 
-describe('fastq_config_from_json', () => {
-  it('should return a list of sample params', async () => {
-    // Make the test function async
-    const result: any[] = await fastq_config_from_json(CONTEXT.local_file);
-    expect(result).toBeDefined();
-    expect(result.length).toEqual(1);
-    const sample = result[0];
+describe('fastq_config_from_uri', () => {
+  it('should return a single sample', async () => {
+    const sample = await fastq_config_from_uri(CONTEXT.local_file);
     expect(sample).toBeDefined();
     expect(typeof sample).toEqual('object');
     expect(sample.sample_name).toEqual('NA12878');
