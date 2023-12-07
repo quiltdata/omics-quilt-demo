@@ -28,6 +28,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
 });
 project.tryFindObjectFile('.github/workflows/build.yml')!.addOverride('jobs.build.env', {
   CI: 'true',
+  AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}',
+  AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}',
   AWS_ACCOUNT_ID: '${{ secrets.AWS_ACCOUNT_ID }}',
   AWS_DEFAULT_REGION: '${{ secrets.AWS_DEFAULT_REGION }}',
   CDK_APP_NAME: '${{ secrets.CDK_APP_NAME }}',
