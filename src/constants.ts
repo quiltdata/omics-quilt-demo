@@ -25,6 +25,11 @@ export class Constants {
     return cc.get(key);
   }
 
+  public static GetRegion(): string {
+    const cc = new Constants({});
+    return cc.region;
+  }
+
   public static MapEnvars(envars: string[]): KeyedConfig {
     const envs: KeyedConfig = {};
     envars.forEach((key: string) => {
@@ -35,7 +40,7 @@ export class Constants {
 
   public static DefaultS3(region: string = '') {
     if (region === '') {
-      region = Constants.GET('CDK_DEFAULT_REGION');
+      region = Constants.GetRegion();
     }
     const s3 = new S3Client({ region: region });
     return s3;
@@ -67,10 +72,15 @@ export class Constants {
       Bucket: bucket,
       Key: key,
     });
-    const response = await s3.send(command);
-    const contents = await response.Body!.transformToString();
-    const extension = file.split('.').pop()?.toLowerCase();
-    return Constants.LoadObjectData(contents, extension!, env);
+    try {
+      const response = await s3.send(command);
+      const contents = await response.Body!.transformToString();
+      const extension = file.split('.').pop()?.toLowerCase();
+      return Constants.LoadObjectData(contents, extension!, env);
+    } catch (e: any) {
+      console.error(e);
+      throw e;
+    }
   }
 
   public static LoadObjectFile(filePath: string, env: object = {}): KeyedConfig {
@@ -148,7 +158,19 @@ export class Constants {
     this.updateContext(Constants.DEFAULTS);
     this.app = this.get('APP_NAME');
     this.account = this.get('CDK_DEFAULT_ACCOUNT') || this.get('AWS_ACCOUNT_ID');
-    this.region = this.get('CDK_DEFAULT_REGION') || this.get('AWS_REGION');
+    this.region = this.get('CDK_DEFAULT_REGION') || this.get('AWS_DEFAULT_REGION');
+  }
+
+  public toDict(): KeyedConfig {
+    return {
+      app: this.app,
+      account: this.account,
+      region: this.region,
+    };
+  }
+
+  public toString(): string {
+    return JSON.stringify(this.toDict());
   }
 
   public updateContext(envs: KeyedConfig) {
@@ -195,19 +217,3 @@ export class Constants {
 }
 
 export default Constants;
-
-
-/*
-// placeholders for lambda functions
-
-export const OUTPUT_S3_LOCATION: string = process.env.OUTPUT_S3_LOCATION!
-export const OMICS_ROLE: string = process.env.OMICS_ROLE!
-export const WORKFLOW_ID: string = process.env.WORKFLOW_ID!
-export const UPSTREAM_WORKFLOW_ID: string = process.env.UPSTREAM_WORKFLOW_ID!
-export const ECR_REGISTRY: string = process.env.ECR_REGISTRY!
-export const VEP_SPECIES: string = process.env.SPECIES!
-export const VEP_DIR_CACHE: string = process.env.DIR_CACHE!
-export const VEP_CACHE_VERSION: string = process.env.CACHE_VERSION!
-export const VEP_GENOME: string = process.env.GENOME!
-export const LOG_LEVEL: string = process.env.LOG_LEVEL!
-*/

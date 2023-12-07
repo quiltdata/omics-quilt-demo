@@ -74,13 +74,14 @@ export class OmicsQuiltStack extends Stack {
       topicName: topicName,
     });
     const email = this.cc.get('CDK_DEFAULT_EMAIL');
-    statusTopic.addSubscription(new EmailSubscription(email));
+    const subscription = new EmailSubscription(email);
+    statusTopic.addSubscription(subscription);
     const servicePrincipal = new ServicePrincipal('events.amazonaws.com');
     statusTopic.grantPublish(servicePrincipal);
     statusTopic.grantPublish(principal);
 
     // Create EventBridge rule to detect Omics status changes
-    const omicsRule = this.makeOmicsRule(`${topicName}-omics-rule`);
+    const omicsRule = this.makeOmicsEventRule(`${topicName}-omics-rule`);
     omicsRule.addTarget(new SnsTopic(statusTopic));
     // Create EventBridge rule to detect S3 bucket events
     const inputBucketRule = this.makeBucketEventRule(
@@ -96,7 +97,7 @@ export class OmicsQuiltStack extends Stack {
     return statusTopic;
   }
 
-  private makeOmicsRule(ruleName: string) {
+  private makeOmicsEventRule(ruleName: string) {
     const ruleOmics = new Rule(this, ruleName,
       {
         eventPattern: {
@@ -260,7 +261,6 @@ export class OmicsQuiltStack extends Stack {
     omicsRole.addToPolicy(omicsKmsPolicy);
 
     // Allow Omics service role to access some common public AWS S3 buckets with test data
-    const AWS_REGION = this.cc.get('AWS_REGION');
     const omicsRoleAdditionalPolicy = new PolicyStatement({
       actions: ['s3:Get*', 's3:List*'],
       resources: [
@@ -268,10 +268,10 @@ export class OmicsQuiltStack extends Stack {
         'arn:aws:s3:::broad-references/*',
         'arn:aws:s3:::giab',
         'arn:aws:s3:::giab/*',
-        `arn:aws:s3:::aws-genomics-static-${AWS_REGION}`,
-        `arn:aws:s3:::aws-genomics-static-${AWS_REGION}/*`,
-        `arn:aws:s3:::omics-${AWS_REGION}`,
-        `arn:aws:s3:::omics-${AWS_REGION}/*`,
+        `arn:aws:s3:::aws-genomics-static-${this.cc.region}`,
+        `arn:aws:s3:::aws-genomics-static-${this.cc.region}/*`,
+        `arn:aws:s3:::omics-${this.cc.region}`,
+        `arn:aws:s3:::omics-${this.cc.region}/*`,
       ],
     });
     omicsRole.addToPolicy(omicsRoleAdditionalPolicy);
