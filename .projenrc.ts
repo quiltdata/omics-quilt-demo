@@ -1,6 +1,7 @@
 import { awscdk } from 'projen';
 const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: '2.114.1',
+  majorVersion: 1,
   defaultReleaseBranch: 'main',
   description: 'Use CDK to create Quilt packages from AWS HealthOmics',
   name: 'omics-quilt-demo',
