@@ -9,6 +9,7 @@ import {
 const CONTEXT = {
   debug: true,
   local_file: './workflows/fastq/aws_region.json',
+  INPUT_S3_LOCATION: './',
 };
 
 describe('fastq_config_from_uri', () => {

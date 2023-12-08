@@ -1,6 +1,6 @@
 import 'dotenv/config';
-import { readFileSync } from 'fs';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { readFileSync, writeFileSync } from 'fs';
+import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import handlebars from 'handlebars';
 import yaml from 'js-yaml';
 
@@ -77,6 +77,36 @@ export class Constants {
       const contents = await response.Body!.transformToString();
       const extension = file.split('.').pop()?.toLowerCase();
       return Constants.LoadObjectData(contents, extension!, env);
+    } catch (e: any) {
+      console.error(e);
+      throw e;
+    }
+  }
+
+  public static async SaveObjectURI(uri: string, itme: any): Promise<void> {
+    const data = JSON.stringify(itme, null, 2);
+    const split = uri.split('://');
+    const scheme = split[0];
+    if (!scheme || scheme === '' || scheme === 'file' || scheme[0] === '/' || scheme[0] == '.') {
+      return writeFileSync(uri, data);
+    }
+    if (scheme !== 's3') {
+      throw new Error(`Unsupported scheme: ${scheme}`);
+    }
+    const paths = split[1].split('/');
+    const s3 = Constants.DefaultS3();
+    const bucket = paths[0];
+    const file = paths.slice(-1)[0];
+    const key = paths.slice(1).join('/');
+    console.info(`Saving ${file} to ${bucket} in ${key}`);
+    const command = new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: data,
+    });
+    try {
+      const response = await s3.send(command);
+      console.debug(response);
     } catch (e: any) {
       console.error(e);
       throw e;

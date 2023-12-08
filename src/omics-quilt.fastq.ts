@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Constants, KeyedConfig } from './constants';
 
 const OUTPUT_S3_LOCATION = process.env.OUTPUT_S3_LOCATION!;
+const INPUT_S3_LOCATION = process.env.INPUT_S3_LOCATION!;
 const OMICS_ROLE = process.env.OMICS_ROLE!;
 const WORKFLOW_ID = process.env.WORKFLOW_ID!;
 const LOG_LEVEL = process.env.LOG_LEVEL!;
@@ -66,15 +67,23 @@ export async function handler(event: any, context: any) {
   }
   return { message: 'Success' };
 }
+
+async function save_input(prefix: string, item: any) {
+  const input_uri = INPUT_S3_LOCATION + '/' + prefix + '.json';
+  console.info(`Writing input to ${input_uri}`);
+  await Constants.SaveObjectURI(input_uri, item);
+}
+
 async function run_workflow(
   item: Record<string, string>,
   uri: string,
   context: any,
 ) {
   const _samplename = item.sample_name;
+  await save_input(_samplename, item);
   console.info(`Starting workflow for sample: ${_samplename}`);
   const uuid = uuidv4();
-  const run_name = `Sample_${_samplename}_${uuid}`;
+  const run_name = `${_samplename}.${uuid}.`;
   const workflow_type = 'READY2RUN' as WorkflowType;
   const options = {
     workflowType: workflow_type,
@@ -88,9 +97,11 @@ async function run_workflow(
       SOURCE: 'LAMBDA_FASTQ',
       RUN_NAME: run_name,
       SAMPLE_MANIFEST: uri,
+      VIVOS_ID: uuid,
     },
     requestId: uuid,
   };
+  await save_input(run_name + 'input', options);
   try {
     console.debug(`Workflow options: ${JSON.stringify(options)}`);
     if (context.debug) {
@@ -99,6 +110,7 @@ async function run_workflow(
       const input: StartRunCommandInput = options;
       const response = await start_omics_run(input);
       console.info(`Workflow response: ${JSON.stringify(response)}`);
+      await save_input(run_name + 'output', response);
     }
   } catch (e: any) {
     console.error('Error : ' + e.toString());

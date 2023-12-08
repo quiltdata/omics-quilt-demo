@@ -160,10 +160,12 @@ export class OmicsQuiltStack extends Stack {
   }
 
   private makeLambda(name: string, env: object) {
-    const output = ['s3:/', this.outputBucket.bucketName, this.cc.app]
+    const output = ['s3:/', this.outputBucket.bucketName, this.cc.app];
+    const input = ['s3:/', this.inputBucket.bucketName, this.manifest_prefix];
     const default_env = {
       OMICS_ROLE: this.omicsRole.roleArn,
       OUTPUT_S3_LOCATION: output.join('/'),
+      INPUT_S3_LOCATION: input.join('/'),
       WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),
       ECR_REGISTRY: this.cc.getEcrRegistry(),
       LOG_LEVEL: 'ALL',
