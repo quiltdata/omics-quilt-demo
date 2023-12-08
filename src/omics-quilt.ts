@@ -19,6 +19,7 @@ import {
 } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { type Construct } from 'constructs';
 import { Constants } from './constants';
 
@@ -45,7 +46,8 @@ export class OmicsQuiltStack extends Stack {
     // Create Input/Output S3 buckets
     this.inputBucket = this.makeBucket('input');
     this.outputBucket = this.makeBucket('output');
-
+    this.makeParameter('INPUT_BUCKET_NAME', this.inputBucket.bucketName);
+    this.makeParameter('OUTPUT_BUCKET_NAME', this.outputBucket.bucketName);
     // SNS Topic for Workflow notifications
     this.makeStatusNotifications(this.principal); // for debugging purposes
 
@@ -57,6 +59,7 @@ export class OmicsQuiltStack extends Stack {
 
     // Create Lambda function to submit initial HealthOmics workflow
     const fastqLambda = this.makeLambda('fastq', {});
+    this.makeParameter('FASTQ_LAMBDA_ARN', fastqLambda.functionArn);
     // Add S3 event source to Lambda
     const fastqTrigger = new S3EventSource(this.inputBucket, {
       events: [EventType.OBJECT_CREATED],
@@ -67,12 +70,20 @@ export class OmicsQuiltStack extends Stack {
     fastqLambda.addEventSource(fastqTrigger);
   }
 
+  private makeParameter(name: string, value: string) {
+    return new StringParameter(this, name, {
+      parameterName: `/vivos/${this.cc.app}/${name}`,
+      stringValue: value,
+    });
+  }
+
   private makeStatusNotifications(principal: AccountPrincipal) {
     const topicName = `${this.cc.app}-status-topic`;
     const statusTopic = new Topic(this, topicName, {
       displayName: topicName,
       topicName: topicName,
     });
+    this.makeParameter('STATUS_TOPIC_ARN', statusTopic.topicArn);
     const email = this.cc.get('CDK_DEFAULT_EMAIL');
     const subscription = new EmailSubscription(email);
     statusTopic.addSubscription(subscription);
