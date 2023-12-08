@@ -70,9 +70,12 @@ export class OmicsQuiltStack extends Stack {
     fastqLambda.addEventSource(fastqTrigger);
   }
 
-  private makeParameter(name: string, value: string) {
+  private makeParameter(name: string, value: any) {
+    if (typeof value != 'string') {
+      value = JSON.stringify(value);
+    }
     return new StringParameter(this, name, {
-      parameterName: `/vivos/${this.cc.app}/${name}`,
+      parameterName: this.cc.getParameterName(name),
       stringValue: value,
     });
   }
@@ -157,9 +160,10 @@ export class OmicsQuiltStack extends Stack {
   }
 
   private makeLambda(name: string, env: object) {
+    const output = ['s3:/', this.outputBucket.bucketName, this.cc.app]
     const default_env = {
       OMICS_ROLE: this.omicsRole.roleArn,
-      OUTPUT_S3_LOCATION: 's3://' + this.outputBucket.bucketName + '/outputs',
+      OUTPUT_S3_LOCATION: output.join('/'),
       WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),
       ECR_REGISTRY: this.cc.getEcrRegistry(),
       LOG_LEVEL: 'ALL',

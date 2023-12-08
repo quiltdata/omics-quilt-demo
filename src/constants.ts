@@ -214,6 +214,9 @@ export class Constants {
   public getEcrRegistry(): string {
     return `${this.account}.dkr.ecr.${this.region}.amazonaws.com`;
   }
+  public getParameterName(name: string): string {
+    return `/vivos/${this.app}/${name}`;
+  }
 }
 
 export default Constants;
