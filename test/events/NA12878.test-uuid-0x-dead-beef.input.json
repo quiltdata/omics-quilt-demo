@@ -1,0 +1,23 @@
+{
+  "workflowType": "READY2RUN",
+  "name": "NA12878.test-uuid-0x-dead-beef.",
+  "parameters": {
+    "sample_name": "NA12878",
+    "fastq_pairs": [
+      {
+        "read_group": "Sample_U0a",
+        "fastq_1": "s3://aws-genomics-static-{{ region }}/omics-tutorials/data/fastq/NA12878/Sample_U0a/U0a_CGATGT_L001_R1_001.fastq.gz",
+        "fastq_2": "s3://aws-genomics-static-{{ region }}/omics-tutorials/data/fastq/NA12878/Sample_U0a/U0a_CGATGT_L001_R2_001.fastq.gz",
+        "platform": "illumina"
+      }
+    ]
+  },
+  "outputUri": "./test/events",
+  "tags": {
+    "SOURCE": "LAMBDA_FASTQ",
+    "RUN_NAME": "NA12878.test-uuid-0x-dead-beef.",
+    "SAMPLE_MANIFEST": "./workflows/fastq/aws_region.json",
+    "VIVOS_ID": "test-uuid-0x-dead-beef"
+  },
+  "requestId": "test-uuid-0x-dead-beef"
+}
