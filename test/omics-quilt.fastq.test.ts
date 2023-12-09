@@ -9,7 +9,9 @@ import {
 const CONTEXT = {
   debug: true,
   local_file: './workflows/fastq/aws_region.json',
-  INPUT_S3_LOCATION: './',
+  INPUT_S3_LOCATION: './test/events',
+  OUTPUT_S3_LOCATION: './test/events',
+  TEST_UUID: 'test-uuid-0x-dead-beef',
 };
 
 describe('fastq_config_from_uri', () => {
