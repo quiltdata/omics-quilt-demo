@@ -3,6 +3,7 @@ import { Rule } from 'aws-cdk-lib/aws-events';
 import { SnsTopic } from 'aws-cdk-lib/aws-events-targets';
 import {
   AccountPrincipal,
+  ArnPrincipal,
   ManagedPolicy,
   PolicyStatement,
   Role,
@@ -22,7 +23,6 @@ import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { type Construct } from 'constructs';
 import { Constants } from './constants';
-import { ArnPrincipal } from 'aws-cdk-lib/aws-iam';
 
 export class OmicsQuiltStack extends Stack {
   public readonly inputBucket: Bucket;

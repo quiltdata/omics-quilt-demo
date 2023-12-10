@@ -33,13 +33,13 @@ project.synth();
 
 
 function override_file_key(file: string, key: string) {
-  const KEYS = "AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_ACCOUNT_ID AWS_DEFAULT_REGION CDK_APP_NAME CDK_DEFAULT_EMAIL QUILT_CATALOG_DOMAIN".split(" ");
-  var opts: {[key: string]: string} = {CI: 'true'};
+  const KEYS = 'AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_ACCOUNT_ID AWS_DEFAULT_REGION CDK_APP_NAME CDK_DEFAULT_EMAIL QUILT_CATALOG_DOMAIN'.split(' ');
+  var opts: {[key: string]: string} = { CI: 'true' };
   for (const k of KEYS) {
     opts[k] = `\${{ secrets.${k} }}`;
   }
-  opts.CDK_DEFAULT_ACCOUNT = opts['AWS_ACCOUNT_ID'];
-  opts.CDK_DEFAULT_REGION = opts['AWS_DEFAULT_REGION'];
+  opts.CDK_DEFAULT_ACCOUNT = opts.AWS_ACCOUNT_ID;
+  opts.CDK_DEFAULT_REGION = opts.AWS_DEFAULT_REGION;
 
   project.tryFindObjectFile(file)?.addOverride(key, opts);
 }
