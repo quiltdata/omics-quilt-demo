@@ -18,6 +18,7 @@ export class Constants {
     READY2RUN_WORKFLOW_ID: '9500764',
     MANIFEST_ROOT: 'fastq',
     MANIFEST_SUFFIX: '.json',
+    QUILT_SENTINEL: 'quilt_metadata.json',
   };
 
   public static GET(key: string): any {

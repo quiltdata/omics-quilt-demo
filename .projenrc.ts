@@ -1,13 +1,17 @@
 import { awscdk } from 'projen';
+
+const cdkVersion = '2.114.1';
+const solutionName = 'omics-quilt-demo';
 const project = new awscdk.AwsCdkTypeScriptApp({
-  cdkVersion: '2.114.1',
+  cdkVersion: cdkVersion,
   majorVersion: 1,
   defaultReleaseBranch: 'main',
   description: 'Use CDK to create Quilt packages from AWS HealthOmics',
-  name: 'omics-quilt-demo',
+  name: solutionName,
   projenrcTs: true,
   deps: [
     'aws-lambda',
+    `@aws-cdk/aws-lambda-python-alpha@^${cdkVersion}-alpha.0`,
     '@aws-sdk/client-s3',
     '@aws-sdk/client-sns',
     '@aws-sdk/client-omics',
