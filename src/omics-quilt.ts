@@ -22,7 +22,7 @@ import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { type Construct } from 'constructs';
 import { Constants } from './constants';
-import { StarPrincipal } from 'aws-cdk-lib/aws-iam';
+import { ArnPrincipal } from 'aws-cdk-lib/aws-iam';
 
 export class OmicsQuiltStack extends Stack {
   public readonly inputBucket: Bucket;
@@ -120,7 +120,7 @@ export class OmicsQuiltStack extends Stack {
           source: ['aws.omics'],
           detailType: ['Run Status Change'],
           detail: {
-            status: ['FAILED', 'COMPLETED', 'CREATED'],
+            status: ['*'],
           },
         },
       },
@@ -158,7 +158,11 @@ export class OmicsQuiltStack extends Stack {
     const bucket = new Bucket(this, name, bucketOptions);
     bucket.grantDelete(this.principal);
     bucket.grantReadWrite(this.principal);
-    bucket.grantReadWrite(new StarPrincipal());
+    const quilt_arn = this.cc.get('QUILT_ROLE_ARN');
+    if (quilt_arn) {
+      const quilt_principal = new ArnPrincipal(quilt_arn);
+      bucket.grantReadWrite(quilt_principal);
+    }
     return bucket;
   }
 
