@@ -1,0 +1,25 @@
+{
+    "workflowType": "READY2RUN",
+    "workflowId": "9500764",
+    "name": "Sample_NA12878_e715abf6-b270-4fb9-bb2d-3e0181fae58a",
+    "roleArn": "arn:aws:iam::850787717197:role/omics-quilt-omicsquiltomicsserviceroleB2864563-ESPOptZHnr8M",
+    "parameters": {
+        "sample_name": "NA12878",
+        "fastq_pairs": [
+            {
+                "read_group": "Sample_U0a",
+                "fastq_1": "s3://aws-genomics-static-us-west-2/omics-tutorials/data/fastq/NA12878/Sample_U0a/U0a_CGATGT_L001_R1_001.fastq.gz",
+                "fastq_2": "s3://aws-genomics-static-us-west-2/omics-tutorials/data/fastq/NA12878/Sample_U0a/U0a_CGATGT_L001_R2_001.fastq.gz",
+                "platform": "illumina"
+            }
+        ]
+    },
+    "logLevel": "ALL",
+    "outputUri": "s3://omics-quilt-omicsquiltckaoutput850787717197uswest-dlvqcfknx63n/outputs",
+    "tags": {
+        "SOURCE": "LAMBDA_FASTQ",
+        "RUN_NAME": "Sample_NA12878_e715abf6-b270-4fb9-bb2d-3e0181fae58a",
+        "SAMPLE_MANIFEST": "s3://omics-quilt-omicsquiltckainput850787717197uswest2-mxbkungl5wod/fastq/us-west-2/us-west-2.json"
+    },
+    "requestId": "e715abf6-b270-4fb9-bb2d-3e0181fae58a"
+}
