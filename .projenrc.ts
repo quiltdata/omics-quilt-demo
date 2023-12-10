@@ -57,4 +57,3 @@ function fix_deprecation_warning() {
   ];
   delete project.jest!.config.globals['ts-jest'];
 }
-
