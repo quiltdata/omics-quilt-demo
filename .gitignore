@@ -33,6 +33,8 @@ jspm_packages/
 .env*
 .DS_Store
 test/__snapshots__/*
+__pycache__
+*.pyc
 !/.projenrc.js
 /test-reports/
 junit.xml

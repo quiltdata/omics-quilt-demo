@@ -29,6 +29,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '.env*',
     '.DS_Store',
     'test/__snapshots__/*',
+    '__pycache__', // Python
+    '*.pyc', // Python
   ],
 });
 override_file_key('.github/workflows/build.yml', 'jobs.build.env');
