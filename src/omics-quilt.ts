@@ -22,6 +22,7 @@ import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { type Construct } from 'constructs';
 import { Constants } from './constants';
+import { StarPrincipal } from 'aws-cdk-lib/aws-iam';
 
 export class OmicsQuiltStack extends Stack {
   public readonly inputBucket: Bucket;
@@ -46,6 +47,7 @@ export class OmicsQuiltStack extends Stack {
     // Create Input/Output S3 buckets
     this.inputBucket = this.makeBucket('input');
     this.outputBucket = this.makeBucket('output');
+
     this.makeParameter('INPUT_BUCKET_NAME', this.inputBucket.bucketName);
     this.makeParameter('OUTPUT_BUCKET_NAME', this.outputBucket.bucketName);
     // SNS Topic for Workflow notifications
@@ -156,6 +158,7 @@ export class OmicsQuiltStack extends Stack {
     const bucket = new Bucket(this, name, bucketOptions);
     bucket.grantDelete(this.principal);
     bucket.grantReadWrite(this.principal);
+    bucket.grantReadWrite(new StarPrincipal());
     return bucket;
   }
 
