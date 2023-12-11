@@ -25,7 +25,7 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { type Construct } from 'constructs';
 import { Constants } from './constants';
 
-const PYTHON_FOLDER = `${__dirname}/src/packager`;
+const PYTHON_FOLDER = `${__dirname}/packager`;
 const PYTHON_INDEX = 'packager/index.py';
 
 export class OmicsQuiltStack extends Stack {
@@ -201,6 +201,9 @@ export class OmicsQuiltStack extends Stack {
       timeout: Duration.seconds(60),
       retryAttempts: 1,
       environment: this.makeLambdaEnv(env),
+      bundling: {
+        assetExcludes: [".mypy_cache", ".pytest_cache", ".tox", "__pycache__"],
+      },
     });
   }
 
