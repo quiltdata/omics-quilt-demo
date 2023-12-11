@@ -131,10 +131,11 @@ class Constants:
         return str(cc.region)
 
     def __init__(self, context: KEYED = {}) -> None:
-        self.context = context or {}
-        # convert os.environ to a dict
-        self.update_context(os.environ.items())
+        self.context: KEYED = {}
+        if isinstance(context, dict):
+            self.update_context(context.items())
         self.update_context(Constants.DEFAULTS.items())
+        self.update_context(os.environ.items())
         self.app = self.get("APP_NAME")
         self.account = self.get("CDK_DEFAULT_ACCOUNT", "AWS_ACCOUNT_ID")
         self.region = self.get("CDK_DEFAULT_REGION", "AWS_DEFAULT_REGION")
