@@ -35,6 +35,11 @@ const project = new awscdk.AwsCdkTypeScriptApp({
 });
 override_file_key('.github/workflows/build.yml', 'jobs.build.env');
 fix_deprecation_warning();
+const appTestTask = project.addTask("test:app", {
+  cwd: "src/packager",
+  exec: "make test",
+});
+
 project.synth();
 
 

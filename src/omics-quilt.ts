@@ -25,7 +25,7 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { type Construct } from 'constructs';
 import { Constants } from './constants';
 
-const PYTHON_FOLDER = './src/packager';
+const PYTHON_FOLDER = `${__dirname}/src/packager`;
 const PYTHON_INDEX = 'packager/index.py';
 
 export class OmicsQuiltStack extends Stack {
