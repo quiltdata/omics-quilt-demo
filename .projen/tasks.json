@@ -210,13 +210,13 @@
       },
       "steps": [
         {
-          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,@typescript-eslint/eslint-plugin,@typescript-eslint/parser,aws-cdk,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,eslint,jest,jest-junit,projen,ts-jest,ts-node,typescript,@aws-sdk/client-omics,@aws-sdk/client-s3,@aws-sdk/client-sns,@types/js-yaml,@types/uuid,aws-cdk-lib,aws-lambda,constructs,dotenv,handlebars,js-yaml,uuid"
+          "exec": "npx npm-check-updates@16 --upgrade --target=minor --peer --dep=dev,peer,prod,optional --filter=@types/jest,@types/node,@typescript-eslint/eslint-plugin,@typescript-eslint/parser,aws-cdk,esbuild,eslint-import-resolver-typescript,eslint-plugin-import,eslint,jest,jest-junit,projen,ts-jest,ts-node,typescript,@aws-cdk/aws-lambda-python-alpha,@aws-sdk/client-omics,@aws-sdk/client-s3,@aws-sdk/client-sns,@types/js-yaml,@types/uuid,aws-cdk-lib,aws-lambda,constructs,dotenv,handlebars,js-yaml,uuid"
         },
         {
           "exec": "yarn install --check-files"
         },
         {
-          "exec": "yarn upgrade @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest ts-node typescript @aws-sdk/client-omics @aws-sdk/client-s3 @aws-sdk/client-sns @types/js-yaml @types/uuid aws-cdk-lib aws-lambda constructs dotenv handlebars js-yaml uuid"
+          "exec": "yarn upgrade @types/jest @types/node @typescript-eslint/eslint-plugin @typescript-eslint/parser aws-cdk esbuild eslint-import-resolver-typescript eslint-plugin-import eslint jest jest-junit projen ts-jest ts-node typescript @aws-cdk/aws-lambda-python-alpha @aws-sdk/client-omics @aws-sdk/client-s3 @aws-sdk/client-sns @types/js-yaml @types/uuid aws-cdk-lib aws-lambda constructs dotenv handlebars js-yaml uuid"
         },
         {
           "exec": "npx projen"

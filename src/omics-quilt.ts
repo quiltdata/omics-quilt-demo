@@ -1,8 +1,10 @@
+import * as python from '@aws-cdk/aws-lambda-python-alpha';
 import { Duration, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
 import { Rule } from 'aws-cdk-lib/aws-events';
 import { SnsTopic } from 'aws-cdk-lib/aws-events-targets';
 import {
   AccountPrincipal,
+  ArnPrincipal,
   ManagedPolicy,
   PolicyStatement,
   Role,
@@ -23,12 +25,16 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { type Construct } from 'constructs';
 import { Constants } from './constants';
 
+const PYTHON_FOLDER = `${__dirname}/packager`;
+const PYTHON_INDEX = 'packager/index.py';
+
 export class OmicsQuiltStack extends Stack {
   public readonly inputBucket: Bucket;
   public readonly outputBucket: Bucket;
 
   public readonly manifest_prefix: string;
   public readonly manifest_suffix: string;
+  public readonly packager_sentinel: string;
 
   readonly cc: Constants;
   readonly lambdaRole: Role;
@@ -42,10 +48,12 @@ export class OmicsQuiltStack extends Stack {
     const manifest_root = this.cc.get('MANIFEST_ROOT');
     this.manifest_prefix = `${manifest_root}/${this.cc.region}`;
     this.manifest_suffix = this.cc.get('MANIFEST_SUFFIX');
+    this.packager_sentinel = this.cc.get('FASTQ_SENTINEL');
 
     // Create Input/Output S3 buckets
     this.inputBucket = this.makeBucket('input');
     this.outputBucket = this.makeBucket('output');
+
     this.makeParameter('INPUT_BUCKET_NAME', this.inputBucket.bucketName);
     this.makeParameter('OUTPUT_BUCKET_NAME', this.outputBucket.bucketName);
     // SNS Topic for Workflow notifications
@@ -68,6 +76,16 @@ export class OmicsQuiltStack extends Stack {
       ],
     });
     fastqLambda.addEventSource(fastqTrigger);
+
+    const packagerLambda = this.makePythonLambda('packager', {});
+    // TODO: trigger on Omics completion event, not report file
+    const packagerTrigger = new S3EventSource(this.outputBucket, {
+      events: [EventType.OBJECT_CREATED],
+      filters: [
+        { suffix: this.packager_sentinel },
+      ],
+    });
+    packagerLambda.addEventSource(packagerTrigger);
   }
 
   private makeParameter(name: string, value: any) {
@@ -118,7 +136,7 @@ export class OmicsQuiltStack extends Stack {
           source: ['aws.omics'],
           detailType: ['Run Status Change'],
           detail: {
-            status: ['FAILED', 'COMPLETED', 'CREATED'],
+            status: ['*'],
           },
         },
       },
@@ -156,29 +174,54 @@ export class OmicsQuiltStack extends Stack {
     const bucket = new Bucket(this, name, bucketOptions);
     bucket.grantDelete(this.principal);
     bucket.grantReadWrite(this.principal);
+    const quilt_arn = this.cc.get('QUILT_ROLE_ARN');
+    if (quilt_arn) {
+      const quilt_principal = new ArnPrincipal(quilt_arn);
+      bucket.grantReadWrite(quilt_principal);
+    }
     return bucket;
   }
 
   private makeLambda(name: string, env: object) {
-    const output = ['s3:/', this.outputBucket.bucketName, this.cc.app];
-    const input = ['s3:/', this.inputBucket.bucketName, this.manifest_prefix];
-    const default_env = {
-      OMICS_ROLE: this.omicsRole.roleArn,
-      OUTPUT_S3_LOCATION: output.join('/'),
-      INPUT_S3_LOCATION: input.join('/'),
-      WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),
-      ECR_REGISTRY: this.cc.getEcrRegistry(),
-      LOG_LEVEL: 'ALL',
-    };
-    // create merged env
-    const final_env = Object.assign(default_env, env);
     return new NodejsFunction(this, name, {
       runtime: Runtime.NODEJS_18_X,
       role: this.lambdaRole,
       timeout: Duration.seconds(60),
       retryAttempts: 1,
-      environment: final_env,
+      environment: this.makeLambdaEnv(env),
     });
+  }
+
+  private makePythonLambda(name: string, env: object) {
+    return new python.PythonFunction(this, name, {
+      entry: PYTHON_FOLDER,
+      index: PYTHON_INDEX,
+      runtime: Runtime.PYTHON_3_11,
+      role: this.lambdaRole,
+      timeout: Duration.seconds(60),
+      retryAttempts: 1,
+      environment: this.makeLambdaEnv(env),
+      bundling: {
+        assetExcludes: ['.mypy_cache', '.pytest_cache', '.tox', '__pycache__'],
+      },
+    });
+  }
+
+  private makeLambdaEnv(env: object) {
+    const output = ['s3:/', this.outputBucket.bucketName, this.cc.app];
+    const input = ['s3:/', this.inputBucket.bucketName, this.manifest_prefix];
+    const final_env = {
+      ECR_REGISTRY: this.cc.getEcrRegistry(),
+      INPUT_S3_LOCATION: input.join('/'),
+      LOG_LEVEL: 'ALL',
+      OMICS_ROLE: this.omicsRole.roleArn,
+      OUTPUT_S3_LOCATION: output.join('/'),
+      SENTINEL_FILE: this.packager_sentinel,
+      QUILT_METADATA: this.cc.get('QUILT_METADATA'),
+      WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),
+      ...env,
+    };
+    return final_env;
   }
 
   private makeLambdaRole() {

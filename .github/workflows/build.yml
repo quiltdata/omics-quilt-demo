@@ -18,10 +18,10 @@ jobs:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       CDK_APP_NAME: ${{ secrets.CDK_APP_NAME }}
-      CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
-      CDK_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       CDK_DEFAULT_EMAIL: ${{ secrets.CDK_DEFAULT_EMAIL }}
       QUILT_CATALOG_DOMAIN: ${{ secrets.QUILT_CATALOG_DOMAIN }}
+      CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+      CDK_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3

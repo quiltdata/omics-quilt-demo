@@ -17,3 +17,8 @@ repos:
         entry: bash -c "npm run eslint"
         language: node
         stages: [pre-push]
+      - id: python-lint
+        name: python-lint
+        entry: bash -c "cd src/packager && make lint"
+        language: system
+        stages: [pre-commit]

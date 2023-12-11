@@ -1,13 +1,17 @@
 import { awscdk } from 'projen';
+
+const cdkVersion = '2.114.1';
+const solutionName = 'omics-quilt-demo';
 const project = new awscdk.AwsCdkTypeScriptApp({
-  cdkVersion: '2.114.1',
+  cdkVersion: cdkVersion,
   majorVersion: 1,
   defaultReleaseBranch: 'main',
   description: 'Use CDK to create Quilt packages from AWS HealthOmics',
-  name: 'omics-quilt-demo',
+  name: solutionName,
   projenrcTs: true,
   deps: [
     'aws-lambda',
+    `@aws-cdk/aws-lambda-python-alpha@^${cdkVersion}-alpha.0`,
     '@aws-sdk/client-s3',
     '@aws-sdk/client-sns',
     '@aws-sdk/client-omics',
@@ -25,25 +29,41 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '.env*',
     '.DS_Store',
     'test/__snapshots__/*',
+    '__pycache__', // Python
+    '*.pyc', // Python
   ],
 });
-project.tryFindObjectFile('.github/workflows/build.yml')!.addOverride('jobs.build.env', {
-  CI: 'true',
-  AWS_ACCESS_KEY_ID: '${{ secrets.AWS_ACCESS_KEY_ID }}',
-  AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}',
-  AWS_ACCOUNT_ID: '${{ secrets.AWS_ACCOUNT_ID }}',
-  AWS_DEFAULT_REGION: '${{ secrets.AWS_DEFAULT_REGION }}',
-  CDK_APP_NAME: '${{ secrets.CDK_APP_NAME }}',
-  CDK_DEFAULT_ACCOUNT: '${{ secrets.AWS_ACCOUNT_ID }}',
-  CDK_DEFAULT_REGION: '${{ secrets.AWS_DEFAULT_REGION }}',
-  CDK_DEFAULT_EMAIL: '${{ secrets.CDK_DEFAULT_EMAIL }}',
-  QUILT_CATALOG_DOMAIN: '${{ secrets.QUILT_CATALOG_DOMAIN }}',
+override_file_key('.github/workflows/build.yml', 'jobs.build.env');
+fix_deprecation_warning();
+/*
+const appTestTask = project.addTask('pytest', {
+  cwd: 'src/packager',
+  exec: 'make test',
 });
-// Fix Jest 29 warning about deprecated config in `globals`
-project.jest!.config.transform ??= {};
-project.jest!.config.transform['\\.ts$'] = [
-  'ts-jest',
-  project.jest?.config.globals['ts-jest'],
-];
-delete project.jest!.config.globals['ts-jest'];
+const testTask = project.tasks.tryFind('test');
+testTask?.spawn(appTestTask);
+*/
 project.synth();
+
+
+function override_file_key(file: string, key: string) {
+  const KEYS = 'AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_ACCOUNT_ID AWS_DEFAULT_REGION CDK_APP_NAME CDK_DEFAULT_EMAIL QUILT_CATALOG_DOMAIN'.split(' ');
+  var opts: {[key: string]: string} = { CI: 'true' };
+  for (const k of KEYS) {
+    opts[k] = `\${{ secrets.${k} }}`;
+  }
+  opts.CDK_DEFAULT_ACCOUNT = opts.AWS_ACCOUNT_ID;
+  opts.CDK_DEFAULT_REGION = opts.AWS_DEFAULT_REGION;
+
+  project.tryFindObjectFile(file)?.addOverride(key, opts);
+}
+
+// Fix Jest 29 warning about deprecated config in `globals`
+function fix_deprecation_warning() {
+  project.jest!.config.transform ??= {};
+  project.jest!.config.transform['\\.ts$'] = [
+    'ts-jest',
+    project.jest?.config.globals['ts-jest'],
+  ];
+  delete project.jest!.config.globals['ts-jest'];
+}
