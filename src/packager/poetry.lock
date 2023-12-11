@@ -608,6 +608,20 @@ ssh = ["paramiko"]
 tqdm = ["tqdm"]
 
 [[package]]
+name = "gsalib"
+version = "1.0.6"
+description = "Python version of R gsalib to read GATK Report tables into pandas DataFrames"
+optional = false
+python-versions = "*"
+files = [
+    {file = "gsalib-1.0.6-py2.py3-none-any.whl", hash = "sha256:00e59671709beb8859686d584075fa4a1f19a0a23002094ccb5e6256c5d2237b"},
+    {file = "gsalib-1.0.6.tar.gz", hash = "sha256:43ce95242625826f5b339f7e250a0a259e78af4a821300f75dfcf470e590a0e1"},
+]
+
+[package.dependencies]
+pandas = "*"
+
+[[package]]
 name = "idna"
 version = "3.6"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -1871,4 +1885,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "6408bafe9978ac4011e14ab2892b0a395c02f3102d1800d84f8ac1906f684db9"
+content-hash = "1e8bda917c547f1de7ce9b60bae39cb97bb04439afb36c47bc1369e0bec5fb47"

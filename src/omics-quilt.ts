@@ -78,6 +78,7 @@ export class OmicsQuiltStack extends Stack {
 
     const sentinelLambda = this.makePythonLambda('sentinel', {});
 
+    // TODO: trigger on Omics completion
     const sentinelTrigger = new S3EventSource(this.outputBucket, {
       events: [EventType.OBJECT_CREATED],
       filters: [
