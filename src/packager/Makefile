@@ -18,5 +18,5 @@ watch:
 	poetry run ptw --now .
 
 lint:
-	poetry run mypy .
+	poetry run mypy packager
 	poetry run black .

@@ -1,10 +1,9 @@
-# from gsalib import GatkReport  # type: ignore
+from gsalib import GatkReport  # type: ignore
 
-# from quiltcore import Domain
-from .constants import Constants
+from .constants import Constants, KEYED
 
 
-def handler(event, context={}):
+def handler(event: KEYED, context: KEYED = {}) -> KEYED:
     cc = Constants(context)
     # Extract the value of detail.outputURI from the event
     print(event)
@@ -15,6 +14,6 @@ def handler(event, context={}):
     for temp_path in cc.DownloadURI(report_uri):
         print(temp_path)
         if temp_path.exists():
-            report = str(temp_path)  # GatkReport
+            report = GatkReport(str(temp_path))
             return {"statusCode": 200, "body": report, "uri": report_uri}
     return {"statusCode": 404, "body": f"File not found: {report_uri}"}

@@ -4,14 +4,14 @@ import os
 
 from dotenv import load_dotenv
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, Generator
+from typing import Any, Generator
 from pathlib import Path
 from upath import UPath
 
 
 load_dotenv("../../.env")
 
-KEYED = Dict[str, Any]
+KEYED = dict[str, Any]
 
 
 class Constants:
@@ -61,8 +61,8 @@ class Constants:
         else:
             raise ValueError(f"Unsupported file extension: {extension}")
         if isinstance(parsed, list):
-            return parsed[0]
-        return parsed
+            parsed = parsed[0]
+        return KEYED(parsed)
 
     @classmethod
     def LoadObjectUri(cls, uri: str, env: KEYED = {}) -> KEYED:
@@ -102,10 +102,10 @@ class Constants:
         cc = cls({})
         if cc.region is None:
             raise ValueError("AWS region not set")
-        return cc.region
+        return str(cc.region)
 
     def __init__(self, context: KEYED = {}) -> None:
-        self.context = context
+        self.context = context or {}
         # convert os.environ to a dict
         self.update_context(os.environ.items())
         self.update_context(Constants.DEFAULTS.items())
@@ -123,7 +123,7 @@ class Constants:
     def to_string(self) -> str:
         return json.dumps(self.to_dict())
 
-    def update_context(self, items) -> None:
+    def update_context(self, items: Any) -> None:
         for env, value in items:
             if self.context.get(env) is None:
                 self.context[env] = value

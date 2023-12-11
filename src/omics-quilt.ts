@@ -202,7 +202,7 @@ export class OmicsQuiltStack extends Stack {
       retryAttempts: 1,
       environment: this.makeLambdaEnv(env),
       bundling: {
-        assetExcludes: [".mypy_cache", ".pytest_cache", ".tox", "__pycache__"],
+        assetExcludes: ['.mypy_cache', '.pytest_cache', '.tox', '__pycache__'],
       },
     });
   }
