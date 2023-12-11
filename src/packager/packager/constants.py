@@ -50,6 +50,7 @@ class Constants:
         "TIMESTAMP_FILE": "quilt_timestamp.json",
         "SOURCE_APP": "omics-quilt",
         "QUILT_METADATA": "quilt_metadata.json",
+        "QUILT_SUMMARIZE": "quilt_summarize.json",
         "FASTQ_SENTINEL": "out/bqsr_report/NA12878.hg38.recal_data.csv",
     }
 

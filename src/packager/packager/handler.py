@@ -1,8 +1,10 @@
+import json
+
 from gsalib import GatkReport  # type: ignore
-from typing import Any, TYPE_CHECKING
 from pathlib import Path
-from upath import UPath
 from quilt3 import Package  # type: ignore
+from typing import Any, TYPE_CHECKING
+from upath import UPath
 
 from .constants import Constants, KEYED
 
@@ -39,27 +41,35 @@ class Handler:
         self.cc = Constants(self.context)
 
     def handleEvent(self, event: KEYED) -> KEYED:
-        event = self.parseEvent(event)
-        print(event)
-        if "type" not in event:
+        self.event = event
+        opts = self.parseEvent(event)
+        print(opts)
+        if not opts.get("type"):
             return {
-                "statusCode": 400,
+                "statusCode": 400,  # Bad Request
                 "body": "No type",
             }
-        if event["type"] != "ObjectCreated:Put":
+        if opts["type"] != "ObjectCreated:Put":
             return {
-                "statusCode": 200,
+                "statusCode": 404,  # Not Found
                 "body": "No action",
             }
 
-        report_uri = f"s3://{event['bucket']}/{event['key']}"
+        report_uri = f"s3://{opts['bucket']}/{opts['key']}"
         report_path = UPath(report_uri)
         root = report_path.parent.parent.parent
-        tables = self.downloadReport(report_uri, root)
-        result = self.packageFolder(tables, root, event)
+        meta = opts
+        if not opts.get("debug"):
+            tables = self.downloadReport(report_uri, root)
+            self.summarizeTables(tables, root)
+            meta = self.packageFolder(root, opts)
         return {
             "statusCode": 200,
-            "body": result,
+            "body": {
+                "root": str(root),
+                "report": report_uri,
+                "meta": meta,
+            },
         }
 
     def parseEvent(self, event: KEYED) -> KEYED:
@@ -78,6 +88,7 @@ class Handler:
             "bucket": s3["bucket"]["name"],
             "key": key,
             "package": Constants.GetPackageName(UPath(key)),
+            "debug": record.get("debug", False),
         }
 
     def downloadReport(self, report_uri: str, root: Path) -> KEYED:
@@ -98,10 +109,25 @@ class Handler:
             tables[name] = str(dest)
         return tables
 
-    def packageFolder(self, tables: KEYED, root: Path, opts: KEYED) -> str:
+    def summarizeTables(self, tables: KEYED, root: Path) -> Path:
+        names = list(tables.keys())
+        path = root / self.cc.get("QUILT_SUMMARIZE")
+        path.write_text(json.dumps(names, indent=2))
+        return path
+
+    def packageFolder(self, root: Path, opts: KEYED) -> KEYED:
         pkg = Package()
         pkg.set_dir(root)
-        pkg_name = f"{root.name}.quilt"
-        pkg_path = root / pkg_name
-        pkg.build(pkg_path)
-        return str(pkg_path)
+        meta_file = root / self.cc.get("QUILT_METADATA")
+        meta = json.load(meta_file.read_text())
+        meta["options"] = opts
+        meta["event"] = self.event
+        meta["context"] = self.context
+
+        pkg.push(
+            self.cc.get("QUILT_PKG_NAME"),
+            registry=self.cc.get("QUILT_REGISTRY"),
+            message=json.dumps(opts, ensure_ascii=True),
+            meta=meta,
+        )
+        return meta
