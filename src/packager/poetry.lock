@@ -19,6 +19,29 @@ tests = ["attrs[tests-no-zope]", "zope-interface"]
 tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-xdist[psutil]"]
 
 [[package]]
+name = "aws-lambda-powertools"
+version = "2.29.1"
+description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
+optional = false
+python-versions = ">=3.7.4,<4.0.0"
+files = [
+    {file = "aws_lambda_powertools-2.29.1-py3-none-any.whl", hash = "sha256:430cc6a2a4039e21198c0d63af794af8109533bcc9e7ae9434026eefce397b3c"},
+    {file = "aws_lambda_powertools-2.29.1.tar.gz", hash = "sha256:39af6f5a84127d2f20ddf35c130b016cc7fab60f07f887cf86dce634e8c7650a"},
+]
+
+[package.dependencies]
+typing-extensions = ">=4.6.2,<5.0.0"
+
+[package.extras]
+all = ["aws-xray-sdk (>=2.8.0,<3.0.0)", "fastjsonschema (>=2.14.5,<3.0.0)", "pydantic (>=1.8.2,<2.0.0)"]
+aws-sdk = ["boto3 (>=1.20.32,<2.0.0)"]
+datadog = ["datadog-lambda (>=4.77,<6.0)"]
+datamasking-aws-sdk = ["aws-encryption-sdk (>=3.1.1,<4.0.0)"]
+parser = ["pydantic (>=1.8.2,<2.0.0)"]
+tracer = ["aws-xray-sdk (>=2.8.0,<3.0.0)"]
+validation = ["fastjsonschema (>=2.14.5,<3.0.0)"]
+
+[[package]]
 name = "aws-requests-auth"
 version = "0.4.3"
 description = "AWS signature version 4 signing process for the python requests module"
@@ -1031,4 +1054,4 @@ watchmedo = ["PyYAML (>=3.10)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "a68ffe02552fb8da6749e1b1ad4dd7e97cf937f6ca926e420c9fc1f006b5feee"
+content-hash = "044ec274107f4a99355aa0061ad65f914a0f9c0fae85e7a8f115ae4d9baebbbe"
