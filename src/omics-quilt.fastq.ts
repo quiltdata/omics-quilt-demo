@@ -63,7 +63,7 @@ export async function handler(event: any, context: any) {
 }
 
 async function save_metadata(item: any, cc: Constants) {
-  const sentinel_file = cc.get('QUILT_METADATA)')
+  const sentinel_file = cc.get('QUILT_METADATA)');
   if (!sentinel_file) {
     console.info('No QUILT_METADATA, skipping metadata save');
     return;
@@ -110,7 +110,7 @@ async function run_workflow(
         sample: item,
         run: response,
         workflow: options,
-      }
+      };
       await save_metadata(run_metadata, cc);
     }
   } catch (e: any) {
