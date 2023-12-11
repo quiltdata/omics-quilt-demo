@@ -7,10 +7,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-quiltcore = "^0.5.1"
 gsalib = "^1.0.6"
 universal-pathlib = "^0.1.4"
 python-dotenv = "^1.0.0"
+quilt3 = "^5.4.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.11.0"
