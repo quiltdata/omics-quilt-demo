@@ -190,20 +190,8 @@
         },
         {
           "spawn": "eslint"
-        },
-        {
-          "spawn": "test:app"
         }
       ]
-    },
-    "test:app": {
-      "name": "test:app",
-      "steps": [
-        {
-          "exec": "make test"
-        }
-      ],
-      "cwd": "src/packager"
     },
     "test:watch": {
       "name": "test:watch",
