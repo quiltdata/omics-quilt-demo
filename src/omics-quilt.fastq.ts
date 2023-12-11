@@ -62,10 +62,14 @@ export async function handler(event: any, context: any) {
   return { message: 'Success' };
 }
 
-async function save_input(prefix: string, item: any, cc: Constants) {
-  const input_uri = cc.get('INPUT_S3_LOCATION') + '/' + prefix + '.json';
-  console.info(`Writing input to ${input_uri}`);
-  await Constants.SaveObjectURI(input_uri, item);
+async function save_metadata(item: any, cc: Constants) {
+  const sentinel_file = cc.get('QUILT_METADATA)')
+  if (!sentinel_file) {
+    console.info('No QUILT_METADATA, skipping metadata save');
+    return;
+  }
+  console.info(`Writing input to ${sentinel_file}`);
+  await Constants.SaveObjectURI(sentinel_file, item);
 }
 
 async function run_workflow(
@@ -74,7 +78,6 @@ async function run_workflow(
   cc: Constants,
 ) {
   const _samplename = item.sample_name;
-  await save_input(_samplename, item, cc);
   console.info(`Starting workflow for sample: ${_samplename}`);
   const uuid = cc.get('TEST_UUID') || uuidv4();
   const run_name = `${_samplename}.${uuid}.`;
@@ -95,7 +98,6 @@ async function run_workflow(
     },
     requestId: uuid,
   };
-  await save_input(run_name + 'input', options, cc);
   try {
     console.debug(`Workflow options: ${JSON.stringify(options)}`);
     if (cc.get('debug') === true) {
@@ -104,7 +106,12 @@ async function run_workflow(
       const input: StartRunCommandInput = options;
       const response = await start_omics_run(input);
       console.info(`Workflow response: ${JSON.stringify(response)}`);
-      await save_input(run_name + 'output', response, cc);
+      const run_metadata = {
+        sample: item,
+        run: response,
+        workflow: options,
+      }
+      await save_metadata(run_metadata, cc);
     }
   } catch (e: any) {
     console.error('Error : ' + e.toString());

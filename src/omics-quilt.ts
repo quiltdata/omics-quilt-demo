@@ -33,7 +33,7 @@ export class OmicsQuiltStack extends Stack {
 
   public readonly manifest_prefix: string;
   public readonly manifest_suffix: string;
-  public readonly sentinel_suffix: string;
+  public readonly packager_sentinel: string;
 
   readonly cc: Constants;
   readonly lambdaRole: Role;
@@ -47,7 +47,7 @@ export class OmicsQuiltStack extends Stack {
     const manifest_root = this.cc.get('MANIFEST_ROOT');
     this.manifest_prefix = `${manifest_root}/${this.cc.region}`;
     this.manifest_suffix = this.cc.get('MANIFEST_SUFFIX');
-    this.sentinel_suffix = this.cc.get('QUILT_SENTINEL');
+    this.packager_sentinel = this.cc.get('FASTQ_SENTINEL');
 
     // Create Input/Output S3 buckets
     this.inputBucket = this.makeBucket('input');
@@ -76,16 +76,15 @@ export class OmicsQuiltStack extends Stack {
     });
     fastqLambda.addEventSource(fastqTrigger);
 
-    const sentinelLambda = this.makePythonLambda('sentinel', {});
-
-    // TODO: trigger on Omics completion
-    const sentinelTrigger = new S3EventSource(this.outputBucket, {
+    const packagerLambda = this.makePythonLambda('packager', {});
+    // TODO: trigger on Omics completion event, not report file
+    const packagerTrigger = new S3EventSource(this.outputBucket, {
       events: [EventType.OBJECT_CREATED],
       filters: [
-        { suffix: this.sentinel_suffix },
+        { suffix: this.packager_sentinel },
       ],
     });
-    sentinelLambda.addEventSource(sentinelTrigger);
+    packagerLambda.addEventSource(packagerTrigger);
   }
 
   private makeParameter(name: string, value: any) {
@@ -212,7 +211,8 @@ export class OmicsQuiltStack extends Stack {
       LOG_LEVEL: 'ALL',
       OMICS_ROLE: this.omicsRole.roleArn,
       OUTPUT_S3_LOCATION: output.join('/'),
-      SENTINEL_FILE: this.sentinel_suffix,
+      SENTINEL_FILE: this.packager_sentinel,
+      QUILT_METADATA: this.cc.get('QUILT_METADATA'),
       WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),
       ...env,
     };
