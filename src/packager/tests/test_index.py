@@ -1,19 +1,14 @@
-import json
-
 # import pytest
-from packager.index import handler
-
-TEST_EVENT = "./tests/outputs/8637245/quilt_metadata.json"
+from packager import handler, Constants
+from .conftest import CTX
 
 
 def test_handler():
-    # Load the TEST_EVENT from the quilt_metadata.json file
-    with open(TEST_EVENT) as f:
-        test_event = json.load(f)
-    # Call the handler function with the test event
-    result = handler(test_event, None)
-
-    # Add your assertions here to validate the result
-
-    # Example assertion:
-    assert test_event["outputUri"] in result["body"]
+    event = Constants.LoadObjectUri(CTX["EVENT"])
+    assert event
+    uri = Constants.KeyPathFromObject(event, "detail.runOutputUri")
+    result = handler(event, CTX)
+    assert result
+    print(result)
+    assert result["statusCode"] == 200
+    assert uri in result["uri"]
