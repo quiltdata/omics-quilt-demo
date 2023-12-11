@@ -111,15 +111,16 @@ class Handler:
 
     def summarizeTables(self, tables: KEYED, root: Path) -> Path:
         names = list(tables.keys())
-        path = root / self.cc.get("QUILT_SUMMARIZE")
-        path.write_text(json.dumps(names, indent=2))
-        return path
+        name_string = json.dumps(names, ensure_ascii=True)
+        sum: Path = root / self.cc.get("QUILT_SUMMARIZE")
+        sum.write_text(name_string)
+        return sum
 
     def packageFolder(self, root: Path, opts: KEYED) -> KEYED:
         pkg = Package()
         pkg.set_dir(root)
         meta_file = root / self.cc.get("QUILT_METADATA")
-        meta = json.load(meta_file.read_text())
+        meta: KEYED = json.load(meta_file.read_text())
         meta["options"] = opts
         meta["event"] = self.event
         meta["context"] = self.context
