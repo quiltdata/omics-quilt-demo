@@ -25,7 +25,8 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { type Construct } from 'constructs';
 import { Constants } from './constants';
 
-const PYTHON_LAMBDA = './src/packager/packager';
+const PYTHON_FOLDER = './src/packager';
+const PYTHON_INDEX = 'packager/index.py';
 
 export class OmicsQuiltStack extends Stack {
   public readonly inputBucket: Bucket;
@@ -193,8 +194,9 @@ export class OmicsQuiltStack extends Stack {
 
   private makePythonLambda(name: string, env: object) {
     return new python.PythonFunction(this, name, {
-      entry: PYTHON_LAMBDA,
-      runtime: Runtime.PYTHON_3_8,
+      entry: PYTHON_FOLDER,
+      index: PYTHON_INDEX,
+      runtime: Runtime.PYTHON_3_11,
       role: this.lambdaRole,
       timeout: Duration.seconds(60),
       retryAttempts: 1,
