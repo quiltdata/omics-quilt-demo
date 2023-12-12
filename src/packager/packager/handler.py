@@ -5,7 +5,9 @@ from pathlib import Path
 from quilt3 import Package  # type: ignore
 from typing import Any, TYPE_CHECKING
 
-from .constants import Constants, KEYED
+from .types import KEYED
+
+from .constants import Constants
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing import LambdaContext

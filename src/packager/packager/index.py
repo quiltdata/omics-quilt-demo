@@ -1,7 +1,7 @@
 from typing import Any
 
 from .handler import Handler
-from .constants import KEYED
+from .types import KEYED
 
 
 def handler(event: KEYED, context: Any) -> KEYED:

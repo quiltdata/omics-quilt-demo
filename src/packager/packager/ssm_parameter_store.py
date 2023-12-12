@@ -25,7 +25,7 @@ import boto3  # type: ignore
 # from botocore.exceptions import ClientError
 import datetime
 from typing import Any, List, Optional, TYPE_CHECKING
-from .constants import KEYED
+from .types import KEYED
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient  # type: ignore
@@ -38,7 +38,7 @@ class SSMParameterStore(object):
         region: str = "us-east-1",
         ttl: Optional[int] = None,
     ) -> None:
-        base = (prefix or "").strip("/").lstrip('SSM')
+        base = (prefix or "").strip("/").lstrip("SSM")
         self._prefix = f"/{base}/" if base else "/"
         self._region = region
         self._client: BaseClient = boto3.client("ssm", region_name=region)
@@ -59,7 +59,9 @@ class SSMParameterStore(object):
             raise KeyError(name)
         elif self._keys[name]["type"] == "prefix":
             if abs_key not in self._substores:
-                store = self.__class__(prefix=abs_key, region=self._region, ttl=self._ttl)
+                store = self.__class__(
+                    prefix=abs_key, region=self._region, ttl=self._ttl
+                )
                 store._keys = self._keys[name]["children"]
                 self._substores[abs_key] = store
 
@@ -75,7 +77,9 @@ class SSMParameterStore(object):
         if isinstance(value, list):
             value = ",".join(value)
 
-        self._client.put_parameter(Name=abs_key, Value=value, Type="String", Overwrite=True)
+        self._client.put_parameter(
+            Name=abs_key, Value=value, Type="String", Overwrite=True
+        )
 
         if self._keys is not None:
             self._keys[name] = {"type": "parameter", "value": value}
@@ -85,7 +89,11 @@ class SSMParameterStore(object):
         self._substores = {}
 
         paginator = self._client.get_paginator("describe_parameters")
-        pager = paginator.paginate(ParameterFilters=[dict(Key="Path", Option="Recursive", Values=[self._prefix])])
+        pager = paginator.paginate(
+            ParameterFilters=[
+                dict(Key="Path", Option="Recursive", Values=[self._prefix])
+            ]
+        )
 
         for page in pager:
             for p in page["Parameters"]:
@@ -115,11 +123,15 @@ class SSMParameterStore(object):
         entry = self._keys[name]
 
         # simple ttl
-        if self._ttl is False or ("expire" in entry and entry["expire"] <= datetime.datetime.now()):
+        if self._ttl is False or (
+            "expire" in entry and entry["expire"] <= datetime.datetime.now()
+        ):
             entry.pop("value", None)
 
         if "value" not in entry:
-            parameter = self._client.get_parameter(Name=abs_key, WithDecryption=True)["Parameter"]
+            parameter = self._client.get_parameter(Name=abs_key, WithDecryption=True)[
+                "Parameter"
+            ]
             value = parameter["Value"]
             if parameter["Type"] == "StringList":
                 value = value.split(",")
@@ -127,7 +139,9 @@ class SSMParameterStore(object):
             entry["value"] = value
 
             if self._ttl:
-                entry["expire"] = datetime.datetime.now() + datetime.timedelta(seconds=self._ttl)
+                entry["expire"] = datetime.datetime.now() + datetime.timedelta(
+                    seconds=self._ttl
+                )
             else:
                 entry["expire"] = None
 
