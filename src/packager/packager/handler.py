@@ -57,6 +57,7 @@ class Handler:
         report_uri = f"s3://{opts['bucket']}/{opts['key']}"
         report_path = UPath(report_uri)
         root = report_path.parent.parent.parent
+        print(f"root: {root}")
         meta = opts
         if not opts.get("debug"):
             tables = self.downloadReport(report_uri, root)
@@ -87,7 +88,7 @@ class Handler:
             "type": record["eventName"],
             "bucket": s3["bucket"]["name"],
             "key": key,
-            "package": Constants.GetPackageName(UPath(key)),
+            "package": Constants.GetPackageName(Path(key)),
             "debug": record.get("debug", False),
         }
 
@@ -96,7 +97,8 @@ class Handler:
             print(temp_path)
             if temp_path.exists():
                 report = GatkReport(str(temp_path))
-                root = Path(report_uri).parent.parent.parent
+                report_path = Constants.ToPath(report_uri)
+                root = report_path.parent.parent.parent
                 return self.downloadTables(report, root)
         return {}
 
