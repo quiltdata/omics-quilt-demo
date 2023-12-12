@@ -21,7 +21,7 @@ export class Constants {
     INPUT_METADATA: 'input_metadata.json',
     QUILT_METADATA: 'quilt_metadata.json',
     FASTQ_SENTINEL: 'out/bqsr_report/NA12878.hg38.recal_data.csv',
-    MEMORY_SIZE: '1024',
+    MEMORY_SIZE: 8192,
     TIMEOUT: '900',
   };
 

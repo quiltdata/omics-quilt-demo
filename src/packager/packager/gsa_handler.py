@@ -21,7 +21,7 @@ class GSAHandler:
     @staticmethod
     def ReportRoot(report_uri: str) -> Path:
         report_path = Constants.ToPath(report_uri)
-        return report_path.parent  # WAS: .parent.parent
+        return report_path.parent.parent
 
     @staticmethod
     def ParseURI(file_uri: str) -> KEYED:
