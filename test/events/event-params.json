@@ -3,17 +3,17 @@
         {
             "eventVersion": "2.2",
             "eventSource": "aws:s3",
-            "awsRegion": "us-west-2",
-            "eventTime": "1970-01-01T00:00:00.000Z",
-            "eventName": "event-type",
+            "awsRegion": "us-east-1",
+            "eventTime": "2023-12-11T23:01:23.456Z",
+            "eventName": "ObjectCreated:Put",
             "s3": {
                 "s3SchemaVersion": "1.0",
                 "bucket": {
-                    "name": "nf-core-gallery",
+                    "name": "quilt-ernest-staging",
                     "arn": "bucket-ARN"
                 },
                 "object": {
-                    "key": "quiltdata/nf-quilt/nf-quilt/params.json",
+                    "key": "test/omics-quilt-output/out/bqsr_report/NA12878.hg38.recal_data.csv",
                     "size": 12345,
                     "eTag": "object-eTag",
                     "versionId": "object-version-id"

@@ -22,6 +22,21 @@ def root():
         yield Path(tempdir)
 
 
+def test_parse_event(handler):
+    event_file = CTX["EVENT"]
+    event_path = Path(event_file)
+    assert event_path.exists()
+    event = json.loads(event_path.read_text())
+    assert event is not None
+    assert "Records" in event
+    opts = handler.parseEvent(event)
+    assert opts is not None
+    assert "bucket" in opts
+    assert "key" in opts
+    assert "package" in opts
+    assert "test/omics-quilt-output" == opts["package"]
+
+
 def test_download_report(handler, root):
     report = CTX["REPORT"]
     report_path = Path(report)
