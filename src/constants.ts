@@ -61,7 +61,7 @@ export class Constants {
   public static IsLocal(scheme: string): boolean {
     return scheme === '' || scheme === 'file' || scheme[0] === '/' || scheme[0] == '.';
   }
-  
+
   public static async LoadObjectURI(uri: string, env: object = {}): Promise<KeyedConfig> {
     const split = uri.split('://');
     const scheme = split[0];
@@ -100,7 +100,7 @@ export class Constants {
   }
 
   public static async SaveObjectURI(uri: string, itme: any): Promise<void> {
-    const data = JSON.stringify(itme, null, 2) + "\n";
+    const data = JSON.stringify(itme, null, 2) + '\n';
     const split = uri.split('://');
     const scheme = split[0];
     if (Constants.IsLocal(scheme)) {
@@ -110,7 +110,7 @@ export class Constants {
       } catch (error: any) {
         console.error(error);
         return;
-      }    
+      }
     }
     const paths = split[1].split('/');
     if (scheme !== 's3') {
