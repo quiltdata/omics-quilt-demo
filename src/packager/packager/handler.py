@@ -4,7 +4,6 @@ from gsalib import GatkReport  # type: ignore
 from pathlib import Path
 from quilt3 import Package  # type: ignore
 from typing import Any, TYPE_CHECKING
-from upath import UPath
 
 from .constants import Constants, KEYED
 
@@ -17,6 +16,11 @@ LOG_STREAM = "OmicsQuiltDemo-{:0>4d}{:0>2d}{:0>2d}"
 
 
 class Handler:
+    @staticmethod
+    def ReportRoot(report_uri: str) -> Path:
+        report_path = Constants.ToPath(report_uri)
+        return report_path.parent  # WAS: .parent.parent
+
     @staticmethod
     def ParseURI(file_uri: str) -> KEYED:
         # file_uri = s3://bucket/pkg/name/.../sentinel_file
@@ -55,8 +59,7 @@ class Handler:
             }
 
         report_uri = f"s3://{opts['bucket']}/{opts['key']}"
-        report_path = UPath(report_uri)
-        root = report_path.parent.parent.parent
+        root = self.ReportRoot(report_uri)
         print(f"handleEvent.root: {root}")
         meta = opts
         if not opts.get("debug"):
@@ -96,8 +99,7 @@ class Handler:
         for temp_path in Constants.DownloadURI(report_uri):
             if temp_path.exists():
                 report = GatkReport(str(temp_path))
-                report_path = Constants.ToPath(report_uri)
-                root = report_path.parent.parent.parent
+                root = self.ReportRoot(report_uri)
                 return self.downloadTables(report, root)
         return {}
 
@@ -132,18 +134,18 @@ class Handler:
         meta["options"] = opts
         meta["context"] = self.context
 
-        print(f"packageFolder.meta: {meta}")
-
         root_folder = str(root)
         pkg.set_dir(".", path=root_folder)
         pkg.set_meta(meta)
 
+        print(f"packageFolder.opts: {opts}")
         new_pkg = pkg.push(
             opts["package"],
             registry=f"s3://{opts['bucket']}",
             message=json.dumps(opts, ensure_ascii=True),
             force=True,
         )
+        print(f"packageFolder.new_pkg: {new_pkg}")
         meta["top_hash"] = new_pkg.top_hash
         meta["quilt+uri"] = f"{base_uri}@{new_pkg.top_hash}"
         print(f"packageFolder.meta: {meta}")
