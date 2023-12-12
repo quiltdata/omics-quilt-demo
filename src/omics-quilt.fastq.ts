@@ -63,13 +63,13 @@ export async function handler(event: any, context: any) {
 }
 
 async function save_metadata(item: any, cc: Constants) {
-  const sentinel_file = cc.get('QUILT_METADATA)');
-  if (!sentinel_file) {
-    console.info('No QUILT_METADATA, skipping metadata save');
+  const metadata_file = cc.get('INPUT_METADATA)');
+  if (!metadata_file) {
+    console.info('No INPUT_METADATA, skipping metadata save');
     return;
   }
-  console.info(`Writing input to ${sentinel_file}`);
-  await Constants.SaveObjectURI(sentinel_file, item);
+  console.info(`Writing input to ${metadata_file}`);
+  await Constants.SaveObjectURI(metadata_file, item);
 }
 
 async function run_workflow(

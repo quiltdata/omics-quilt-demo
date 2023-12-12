@@ -142,6 +142,10 @@ class GSAHandler:
             meta: KEYED = json.loads(text)
         else:
             meta = {}
+        input_file = root / self.cc.get("INPUT_METADATA")
+        if input_file.exists():
+            text = input_file.read_text()
+            meta["input"] = json.loads(text)
         meta["options"] = opts
         meta["context"] = self.context
 

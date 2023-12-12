@@ -235,6 +235,7 @@ export class OmicsQuiltStack extends Stack {
       OMICS_ROLE: this.omicsRole.roleArn,
       OUTPUT_S3_LOCATION: output.join('/'),
       SENTINEL_FILE: this.packager_sentinel,
+      INPUT_METADATA: this.cc.get('INPUT_METADATA'),
       QUILT_METADATA: this.cc.get('QUILT_METADATA'),
       WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),
       TIMEOUT: this.cc.get('TIMEOUT'),
