@@ -50,6 +50,7 @@ class Constants:
         "TIMESTAMP_FILE": "quilt_timestamp.json",
         "SOURCE_APP": "omics-quilt",
         "QUILT_METADATA": "quilt_metadata.json",
+        "QUILT_SUMMARIZE": "quilt_summarize.json",
         "FASTQ_SENTINEL": "out/bqsr_report/NA12878.hg38.recal_data.csv",
     }
 
@@ -120,8 +121,8 @@ class Constants:
 
     @staticmethod
     def GetPackageName(file_path: Path) -> str:
-        # last two components of the path
-        return "/".join(file_path.parts[-2:])
+        # first two components of the path
+        return "/".join(file_path.parts[:2])
 
     @classmethod
     def GetRegion(cls) -> str:
