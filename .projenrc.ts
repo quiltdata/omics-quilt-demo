@@ -31,6 +31,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'test/__snapshots__/*',
     '__pycache__', // Python
     '*.pyc', // Python
+    '*_metadata.json', // Quilt
   ],
 });
 override_file_key('.github/workflows/build.yml', 'jobs.build.env');

@@ -45,7 +45,6 @@ describe('save_metadata', () => {
     const item = { name: 'Test Item' };
     const cc = new Constants(CONTEXT);
 
-    // Call the save_metadata function with the provided parameters
     await save_metadata(id, item, cc);
 
     const root = CONTEXT.OUTPUT_S3_LOCATION + '/' + id;

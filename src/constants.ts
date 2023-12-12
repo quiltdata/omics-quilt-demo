@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import handlebars from 'handlebars';
 import yaml from 'js-yaml';
@@ -58,10 +58,14 @@ export class Constants {
     return components.join('/');
   }
 
+  public static IsLocal(scheme: string): boolean {
+    return scheme === '' || scheme === 'file' || scheme[0] === '/' || scheme[0] == '.';
+  }
+
   public static async LoadObjectURI(uri: string, env: object = {}): Promise<KeyedConfig> {
     const split = uri.split('://');
     const scheme = split[0];
-    if (!scheme || scheme === '' || scheme === 'file' || scheme[0] === '/' || scheme[0] == '.') {
+    if (Constants.IsLocal(scheme)) {
       return Constants.LoadObjectFile(uri, env);
     }
     if (scheme !== 's3') {
@@ -88,17 +92,30 @@ export class Constants {
     }
   }
 
+  public static makeDirectory(file_path: string): void {
+    const dirs = file_path.split('/');
+    dirs.pop();
+    const dir = dirs.join('/');
+    mkdirSync(dir, { recursive: true });
+  }
+
   public static async SaveObjectURI(uri: string, itme: any): Promise<void> {
-    const data = JSON.stringify(itme, null, 2);
+    const data = JSON.stringify(itme, null, 2) + '\n';
     const split = uri.split('://');
     const scheme = split[0];
-    if (!scheme || scheme === '' || scheme === 'file' || scheme[0] === '/' || scheme[0] == '.') {
-      return writeFileSync(uri, data);
+    if (Constants.IsLocal(scheme)) {
+      Constants.makeDirectory(uri);
+      try {
+        return writeFileSync(uri, data);
+      } catch (error: any) {
+        console.error(error);
+        return;
+      }
     }
+    const paths = split[1].split('/');
     if (scheme !== 's3') {
       throw new Error(`Unsupported scheme: ${scheme}`);
     }
-    const paths = split[1].split('/');
     const s3 = Constants.DefaultS3();
     const bucket = paths[0];
     const file = paths.slice(-1)[0];
