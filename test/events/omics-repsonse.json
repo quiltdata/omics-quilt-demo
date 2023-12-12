@@ -1,0 +1,17 @@
+{
+    "$metadata": {
+        "httpStatusCode": 201,
+        "requestId": "d37d72d8-274e-4b10-ba47-44bf1f8c7047",
+        "attempts": 1,
+        "totalRetryDelay": 0
+    },
+    "arn": "arn:aws:omics:us-east-1:712023778557:run/9811963",
+    "id": "9811963",
+    "status": "PENDING",
+    "tags": {
+        "SOURCE": "LAMBDA_FASTQ",
+        "SAMPLE_MANIFEST": "s3://omics-quilt-omicsquiltckainput712023778557useast1-1otvm5hq0brmj/fastq/us-east-1/us-east-1.json",
+        "RUN_NAME": "NA12878.b4515e7c-7b4e-4ea3-b8ac-a618714d3715.",
+        "VIVOS_ID": "b4515e7c-7b4e-4ea3-b8ac-a618714d3715"
+    }
+}
