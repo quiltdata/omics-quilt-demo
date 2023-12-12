@@ -216,7 +216,7 @@ export class OmicsQuiltStack extends Stack {
       index: PYTHON_INDEX,
       runtime: Runtime.PYTHON_3_11,
       role: this.lambdaRole,
-      timeout: Duration.seconds(6000),
+      timeout: Duration.seconds(900),
       retryAttempts: 1,
       environment: this.makeLambdaEnv(env),
       bundling: {
