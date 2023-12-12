@@ -4,15 +4,50 @@ Use CDK to create Quilt packages from AWS HealthOmics
 
 ## Usage
 
+### Installation
+
+Use CDK to create and deploy the stack.
+
 ```bash
 cp example.env .env # and edit
-aws configure list-profiles # ensure it is setup properly
-npx npm install
-npm install yarn -g
+aws configure list-profiles # verify AWS credentials exist
+npx npm install # if npm not present (but npx is)
+npm install yarn -g # if yarn not present (but npm is)
 yarn install
 npx cdk bootstrap # if not yet done for this account/region
+# start Docker if not already running
+sudo systemctl start docker # e.g. on Linux (requires large Cloud9 instance!)
 npm run deploy
 ```
+
+You will also need to accept the Subscription from your email client.
+
+### Quilt Integration
+
+Use your Quilt Catalog to browse the inputs and outputs
+
+1. Go to Console and find the Omics-Quilt stack
+2. Copy names of the INPUT and OUTPUT buckets
+3. Copy the RegistryRoleARN
+4. Go your Quilt Catalog
+5. Click "+" on the front page (or Admin Settings -> Buckets)
+6. Click "+" in the upper right corner to add a new bucket
+7. For each bucket, enter the name and ARN
+
+### Run the Workflow
+
+1. Find or create your region's input parameters file: `./workflows/fastq/<region>.json`
+2. Go to Console and find the input bucket
+3. Create Folders `fastq` and, inside that, `<region>`
+4. Upload the JSON file to `s3://<input-bucket>/fastq/<region>/<region>.json`
+
+### View the Results
+
+1. Go to the 'packager' Lambda and view the logs
+2. Grab the 'quilt+uri' from the output
+3. Paste into the URI field of the Quilt Catalog (next to the search bar)
+   1. NOTE: May need to click the package name to stop page reloading
+4. Click "Expand" (and tripledot menu) to interact with result DataGrids
 
 ## Development
 
