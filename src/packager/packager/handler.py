@@ -41,7 +41,6 @@ class Handler:
         self.cc = Constants(self.context)
 
     def handleEvent(self, event: KEYED) -> KEYED:
-        self.event = event
         opts = self.parseEvent(event)
         print(opts)
         if not opts.get("type"):
@@ -69,6 +68,7 @@ class Handler:
                 "root": str(root),
                 "report": report_uri,
                 "meta": meta,
+                "event": event,
             },
         }
 
@@ -117,18 +117,34 @@ class Handler:
         return sum
 
     def packageFolder(self, root: Path, opts: KEYED) -> KEYED:
+        base_uri = f"quilt+s3://{opts['bucket']}#package={opts['package']}"
         pkg = Package()
-        pkg.set_dir(root)
+        assert root.exists()
+        assert root.is_dir()
+
         meta_file = root / self.cc.get("QUILT_METADATA")
-        meta: KEYED = json.load(meta_file.read_text())
+        if meta_file.exists():
+            text = meta_file.read_text()
+            meta: KEYED = json.loads(text)
+        else:
+            meta = {}
         meta["options"] = opts
-        meta["event"] = self.event
         meta["context"] = self.context
 
-        pkg.push(
-            self.cc.get("QUILT_PKG_NAME"),
-            registry=self.cc.get("QUILT_REGISTRY"),
+        print(f"meta: {meta}")
+
+        root_folder = str(root)
+        print(root_folder)
+        pkg.set_dir(".", path=root_folder)
+        pkg.set_meta(meta)
+
+        new_pkg = pkg.push(
+            opts["package"],
+            registry=f"s3://{opts['bucket']}",
             message=json.dumps(opts, ensure_ascii=True),
-            meta=meta,
+            force=True,
         )
+        print(new_pkg)
+        meta["top_hash"] = new_pkg.top_hash
+        meta["quilt+uri"] = f"{base_uri}@{new_pkg.top_hash}"
         return meta
