@@ -1,9 +1,9 @@
 from typing import Any
 
-from .handler import Handler
+from .gsa_handler import GSAHandler
 from .types import KEYED
 
 
 def handler(event: KEYED, context: Any) -> KEYED:
-    handler = Handler(context)
+    handler = GSAHandler(context)
     return handler.handleEvent(event)

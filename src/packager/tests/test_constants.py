@@ -1,6 +1,7 @@
 from packager import Constants
 from .conftest import CTX
 import pytest
+import time
 
 
 @pytest.fixture
@@ -20,3 +21,11 @@ def test_download_object(cc):
         assert filename
         assert filename.exists()
         assert filename.is_file()
+
+
+def test_check_time(cc):
+    key = "timer"
+    assert cc.check_time(key)
+    assert not cc.check_time(key)
+    time.sleep(1.5 * cc.timeout())
+    assert cc.check_time(key)

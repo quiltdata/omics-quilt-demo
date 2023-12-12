@@ -204,7 +204,7 @@ export class OmicsQuiltStack extends Stack {
     return new NodejsFunction(this, name, {
       runtime: Runtime.NODEJS_18_X,
       role: this.lambdaRole,
-      timeout: Duration.seconds(60),
+      timeout: Duration.seconds(this.cc.get('TIMEOUT')),
       retryAttempts: 1,
       environment: this.makeLambdaEnv(env),
     });
@@ -216,7 +216,7 @@ export class OmicsQuiltStack extends Stack {
       index: PYTHON_INDEX,
       runtime: Runtime.PYTHON_3_11,
       role: this.lambdaRole,
-      timeout: Duration.seconds(900),
+      timeout: Duration.seconds(this.cc.get('TIMEOUT')),
       retryAttempts: 1,
       environment: this.makeLambdaEnv(env),
       bundling: {
@@ -237,6 +237,7 @@ export class OmicsQuiltStack extends Stack {
       SENTINEL_FILE: this.packager_sentinel,
       QUILT_METADATA: this.cc.get('QUILT_METADATA'),
       WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),
+      TIMEOUT: this.cc.get('TIMEOUT'),
       ...env,
     };
     return final_env;

@@ -17,7 +17,7 @@ else:
 LOG_STREAM = "OmicsQuiltDemo-{:0>4d}{:0>2d}{:0>2d}"
 
 
-class Handler:
+class GSAHandler:
     @staticmethod
     def ReportRoot(report_uri: str) -> Path:
         report_path = Constants.ToPath(report_uri)
@@ -48,34 +48,43 @@ class Handler:
 
     def handleEvent(self, event: KEYED) -> KEYED:
         opts = self.parseEvent(event)
+        body = {
+            "message": "N/A",
+            "event": event,
+            "opts": opts,
+        }
         print(f"handleEvent.opts: {opts}")
+        ready = self.cc.check_time(opts["key"])
+        if not ready:
+            body["message"] = "Not ready"
+            return {
+                "statusCode": 200,
+                "body": body,
+            }
         if not opts.get("type"):
+            body["message"] = "ERROR: No type"
             return {
                 "statusCode": 400,  # Bad Request
-                "body": "No type",
+                "body": body,
             }
         if opts["type"] != "ObjectCreated:Put":
+            body["message"] = f"ERROR: Bad type: {opts['type']}"
             return {
                 "statusCode": 404,  # Not Found
-                "body": "No action",
+                "body": body,
             }
 
         report_uri = f"s3://{opts['bucket']}/{opts['key']}"
         root = self.ReportRoot(report_uri)
         print(f"handleEvent.root: {root}")
-        meta = opts
         if not opts.get("debug"):
             tables = self.downloadReport(report_uri, root)
             self.summarizeTables(tables, root)
-            meta = self.packageFolder(root, opts)
+            body["opts"] = self.packageFolder(root, opts)
+            body["message"] = f"{report_uri} @ {root}"
         return {
-            "statusCode": 200,
-            "body": {
-                "root": str(root),
-                "report": report_uri,
-                "meta": meta,
-                "event": event,
-            },
+            "statusCode": 201,
+            "body": body,
         }
 
     def parseEvent(self, event: KEYED) -> KEYED:

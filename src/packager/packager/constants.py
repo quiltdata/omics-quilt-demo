@@ -2,6 +2,7 @@ import json
 import yaml
 import os
 
+from datetime import datetime
 from dotenv import load_dotenv
 from tempfile import TemporaryDirectory
 from typing import Any, Generator
@@ -115,6 +116,7 @@ class Constants:
         self.app = self.get("APP_NAME")
         self.account = self.get("CDK_DEFAULT_ACCOUNT", "AWS_ACCOUNT_ID")
         self.region = self.get("CDK_DEFAULT_REGION", "AWS_DEFAULT_REGION")
+        self.ssm = SSMParameterStore(self.app, self.region)
 
     def to_dict(self) -> KEYED:
         return {
@@ -159,5 +161,17 @@ class Constants:
     def get_ecr_registry(self) -> str:
         return f"{self.account}.dkr.ecr.{self.region}.amazonaws.com"
 
-    def get_parameter_name(self, name: str) -> str:
-        return f"/vivos/{self.app}/{name}"
+    def timeout(self) -> int:
+        return int(self.get("TIMEOUT"))
+
+    def check_time(self, key: str) -> bool:
+        now = round(datetime.now().timestamp())
+        if key in self.ssm:
+            prior = int(self.ssm[key])
+            delta = now - prior
+            timeout = self.timeout()
+            if delta < timeout:
+                print(f"Too soon: {delta} < {timeout}")
+                return False
+        self.ssm[key] = str(now)
+        return True
