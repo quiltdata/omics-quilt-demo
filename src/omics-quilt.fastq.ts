@@ -62,17 +62,23 @@ export async function handler(event: any, context: any) {
   return { message: 'Success' };
 }
 
-async function save_metadata(item: any, cc: Constants) {
-  const metadata_file = cc.get('INPUT_METADATA)');
+export async function save_metadata(id: string, item: any, cc: Constants) {
+  const location = cc.get('OUTPUT_S3_LOCATION');
+  if (!location) {
+    console.info('No OUTPUT_S3_LOCATION, skipping metadata save');
+    return;
+  }
+  const metadata_file = cc.get('INPUT_METADATA');
   if (!metadata_file) {
     console.info('No INPUT_METADATA, skipping metadata save');
     return;
   }
-  console.info(`Writing input to ${metadata_file}`);
-  await Constants.SaveObjectURI(metadata_file, item);
+  const uri = `${location}/${id}/out/${metadata_file}`;
+  console.info(`Writing input to ${uri}`);
+  await Constants.SaveObjectURI(uri, item);
 }
 
-async function run_workflow(
+export async function run_workflow(
   item: Record<string, string>,
   uri: string,
   cc: Constants,
@@ -111,7 +117,8 @@ async function run_workflow(
         run: response,
         workflow: options,
       };
-      await save_metadata(run_metadata, cc);
+      const id = response.id!;
+      await save_metadata(id, run_metadata, cc);
     }
   } catch (e: any) {
     console.error('Error : ' + e.toString());

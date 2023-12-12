@@ -1,6 +1,7 @@
-// import exp from 'constants'
 import { TEST_EVENT } from './fixture';
+import { Constants } from '../src/constants';
 import {
+  save_metadata,
   fastq_config_from_uri,
   handler,
 } from '../src/omics-quilt.fastq';
@@ -35,5 +36,22 @@ describe('handler', () => {
   it('should run without error', async () => {
     const result = await handler(TEST_EVENT, CONTEXT);
     expect(result.message).toEqual('Success');
+  });
+});
+
+describe('save_metadata', () => {
+  it('should save metadata successfully', async () => {
+    const id = 'output';
+    const item = { name: 'Test Item' };
+    const cc = new Constants(CONTEXT);
+
+    // Call the save_metadata function with the provided parameters
+    await save_metadata(id, item, cc);
+
+    const root = CONTEXT.OUTPUT_S3_LOCATION + '/' + id;
+    const metadata_file = cc.get('INPUT_METADATA');
+    const uri = `${root}/${metadata_file}`;
+    const saved = await Constants.LoadObjectURI(uri);
+    expect(saved).toEqual(item);
   });
 });
