@@ -111,10 +111,10 @@ class Handler:
         return tables
 
     def summarizeTables(self, tables: KEYED, root: Path) -> Path:
-        names = list(tables.keys())
-        name_string = json.dumps(names, ensure_ascii=True)
+        files = list(tables.values())
+        filename_list = json.dumps(files, ensure_ascii=True)
         sum: Path = root / self.cc.get("QUILT_SUMMARIZE")
-        sum.write_text(name_string)
+        sum.write_text(filename_list)
         return sum
 
     def packageFolder(self, root: Path, opts: KEYED) -> KEYED:
