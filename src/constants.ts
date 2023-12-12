@@ -20,7 +20,7 @@ export class Constants {
     MANIFEST_SUFFIX: '.json',
     QUILT_METADATA: 'quilt_metadata.json',
     FASTQ_SENTINEL: 'out/bqsr_report/NA12878.hg38.recal_data.csv',
-    TIMEOUT: 15*60,
+    TIMEOUT: '900',
   };
 
   public static GET(key: string): any {
@@ -249,6 +249,10 @@ export class Constants {
   }
   public getParameterName(name: string): string {
     return `/vivos/${this.app}/${name}`;
+  }
+
+  public timeout(): number {
+    return parseInt(this.get('TIMEOUT'));
   }
 }
 
