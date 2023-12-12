@@ -1,0 +1,39 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.1",
+            "eventSource": "aws:s3",
+            "awsRegion": "us-east-1",
+            "eventTime": "2023-12-07T00:01:19.408Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+                "principalId": "AWS:AIDA4MFXGKBG5A5H7C2P6"
+            },
+            "requestParameters": {
+                "sourceIPAddress": "104.28.111.127"
+            },
+            "responseElements": {
+                "x-amz-request-id": "ETYMDP7H46PCZ7E5",
+                "x-amz-id-2": "wgTZZp3L8U7wCcWgVCIOM9Sq0JNjpAo4bn96b8h+2Rd/9Nl+HVlAeGSSmjhb0rEIhF3h3QIHoyTC2NS7qZR6flN4JEAYThSa"
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "MzBiMzdiNmEtZDlkNS00M2E0LWE2YmUtNzU5MWVjMDU0MjA0",
+                "bucket": {
+                    "name": "omics-quilt-omicsquiltckainput712023778557useast1-1otvm5hq0brmj",
+                    "ownerIdentity": {
+                        "principalId": "A2UU9N6TQHWEL4"
+                    },
+                    "arn": "arn:aws:s3:::omics-quilt-omicsquiltckainput712023778557useast1-1otvm5hq0brmj"
+                },
+                "object": {
+                    "key": "fastq/us-east-1/us-east-1.json",
+                    "size": 435,
+                    "eTag": "0d3747d0a320638bde5a5e4900d9a93b",
+                    "versionId": "jOV.tQlvWPncrW6HDgLhpnZrL9KnJVAy",
+                    "sequencer": "0065710B4F5CF19691"
+                }
+            }
+        }
+    ]
+}
