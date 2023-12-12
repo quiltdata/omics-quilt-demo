@@ -204,7 +204,7 @@ export class OmicsQuiltStack extends Stack {
     return new NodejsFunction(this, name, {
       runtime: Runtime.NODEJS_18_X,
       role: this.lambdaRole,
-      timeout: Duration.seconds(this.cc.timeout()),
+      timeout: Duration.seconds(60),
       retryAttempts: 1,
       environment: this.makeLambdaEnv(env),
     });
@@ -217,6 +217,7 @@ export class OmicsQuiltStack extends Stack {
       runtime: Runtime.PYTHON_3_11,
       role: this.lambdaRole,
       timeout: Duration.seconds(this.cc.timeout()),
+      memorySize: this.cc.get('MEMORY_SIZE'),
       retryAttempts: 1,
       environment: this.makeLambdaEnv(env),
       bundling: {
