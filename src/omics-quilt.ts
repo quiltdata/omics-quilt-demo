@@ -29,6 +29,24 @@ const PYTHON_FOLDER = `${__dirname}/packager`;
 const PYTHON_INDEX = 'packager/index.py';
 
 export class OmicsQuiltStack extends Stack {
+
+  QUILT_POLICIES = [
+    's3:GetObject',
+    's3:GetObjectTagging',
+    's3:GetObjectVersion',
+    's3:GetObjectVersionTagging',
+    's3:ListObjects',
+    's3:ListObjectsV2',
+    's3:ListObjectVersions',
+    's3:ListBucket',
+    's3:ListBucketVersions',
+    's3:DeleteObject',
+    's3:DeleteObjectVersion',
+    's3:PutObject',
+    's3:PutObjectTagging',
+    's3:GetBucketNotification',
+    's3:PutBucketNotification',
+  ];
   public readonly inputBucket: Bucket;
   public readonly outputBucket: Bucket;
 
@@ -186,7 +204,7 @@ export class OmicsQuiltStack extends Stack {
     return new NodejsFunction(this, name, {
       runtime: Runtime.NODEJS_18_X,
       role: this.lambdaRole,
-      timeout: Duration.seconds(60),
+      timeout: Duration.seconds(this.cc.timeout()),
       retryAttempts: 1,
       environment: this.makeLambdaEnv(env),
     });
@@ -198,7 +216,7 @@ export class OmicsQuiltStack extends Stack {
       index: PYTHON_INDEX,
       runtime: Runtime.PYTHON_3_11,
       role: this.lambdaRole,
-      timeout: Duration.seconds(60),
+      timeout: Duration.seconds(this.cc.timeout()),
       retryAttempts: 1,
       environment: this.makeLambdaEnv(env),
       bundling: {
@@ -219,6 +237,7 @@ export class OmicsQuiltStack extends Stack {
       SENTINEL_FILE: this.packager_sentinel,
       QUILT_METADATA: this.cc.get('QUILT_METADATA'),
       WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),
+      TIMEOUT: this.cc.get('TIMEOUT'),
       ...env,
     };
     return final_env;
@@ -234,29 +253,31 @@ export class OmicsQuiltStack extends Stack {
       ],
     });
 
-    // Allow the Lambda functions to pass Omics service role to the Omics service
-    const lambdaIamPassrolePolicy = new PolicyStatement({
-      actions: ['iam:PassRole'],
-      resources: [this.omicsRole.roleArn],
-    });
-    lambdaRole.addToPolicy(lambdaIamPassrolePolicy);
-
-    const lambdaS3Policy = new PolicyStatement({
-      actions: ['s3:ListBucket', 's3:GetObject', 's3:PutObject'],
+    lambdaRole.addToPolicy(new PolicyStatement({
+      actions: this.QUILT_POLICIES,
       resources: [
         this.inputBucket.bucketArn,
         this.outputBucket.bucketArn,
         this.inputBucket.bucketArn + '/*',
         this.outputBucket.bucketArn + '/*',
       ],
-    });
-    lambdaRole.addToPolicy(lambdaS3Policy);
+    }));
 
-    const lambdaOmicsPolicy = new PolicyStatement({
+    // access parameter store
+    lambdaRole.addToPolicy(new PolicyStatement({
+      actions: ['ssm:GetParameter', 'ssm:PutParameter'],
+      resources: [`arn:aws:ssm:${this.cc.region}:${this.cc.account}:parameter/packager/*`],
+    }));
+    // Allow the Lambda functions to pass Omics service role to the Omics service
+    lambdaRole.addToPolicy(new PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [this.omicsRole.roleArn],
+    }));
+
+    lambdaRole.addToPolicy(new PolicyStatement({
       actions: ['omics:StartRun', 'omics:TagResource', 'omics:GetRun'],
       resources: ['*'],
-    });
-    lambdaRole.addToPolicy(lambdaOmicsPolicy);
+    }));
     return lambdaRole;
   }
 
@@ -266,7 +287,7 @@ export class OmicsQuiltStack extends Stack {
     });
 
     // Limit to buckets from where inputs need to be read
-    const omicsS3ReadPolicy = new PolicyStatement({
+    omicsRole.addToPolicy(new PolicyStatement({
       actions: ['s3:ListBucket', 's3:GetObject'],
       resources: [
         this.inputBucket.bucketArn,
@@ -274,32 +295,29 @@ export class OmicsQuiltStack extends Stack {
         this.inputBucket.bucketArn + '/*',
         this.outputBucket.bucketArn + '/*',
       ],
-    });
-    omicsRole.addToPolicy(omicsS3ReadPolicy);
+    }));
 
     // Limit to buckets where outputs need to be written
-    const omicsS3WritePolicy = new PolicyStatement({
+    omicsRole.addToPolicy(new PolicyStatement({
       actions: ['s3:ListBucket', 's3:PutObject'],
       resources: [
         this.outputBucket.bucketArn,
         this.outputBucket.bucketArn + '/*',
       ],
-    });
-    omicsRole.addToPolicy(omicsS3WritePolicy);
+    }));
 
     // ECR image access
-    const omicsEcrPolicy = new PolicyStatement({
+    omicsRole.addToPolicy(new PolicyStatement({
       actions: [
         'ecr:BatchGetImage',
         'ecr:GetDownloadUrlForLayer',
         'ecr:BatchCheckLayerAvailability',
       ],
       resources: [`arn:aws:ecr:${this.cc.getAcctRegion()}:repository/*`],
-    });
-    omicsRole.addToPolicy(omicsEcrPolicy);
+    }));
 
     // CloudWatch logging access
-    const omicsLoggingPolicy = new PolicyStatement({
+    omicsRole.addToPolicy(new PolicyStatement({
       actions: [
         'logs:CreateLogGroup',
         'logs:DescribeLogStreams',
@@ -308,20 +326,18 @@ export class OmicsQuiltStack extends Stack {
       ],
       resources: [
         `arn:aws:logs:${this.cc.getAcctRegion()}:log-group:/aws/omics/WorkflowLog:log-stream:*`,
-        `arn:aws:logs:${this.cc.getAcctRegion() }:log-group:/aws/omics/WorkflowLog:*`,
+        `arn:aws:logs:${this.cc.getAcctRegion()}:log-group:/aws/omics/WorkflowLog:*`,
       ],
-    });
-    omicsRole.addToPolicy(omicsLoggingPolicy);
+    }));
 
     // KMS access
-    const omicsKmsPolicy = new PolicyStatement({
+    omicsRole.addToPolicy(new PolicyStatement({
       actions: ['kms:Decrypt', 'kms:GenerateDataKey'],
       resources: ['*'],
-    });
-    omicsRole.addToPolicy(omicsKmsPolicy);
+    }));
 
     // Allow Omics service role to access some common public AWS S3 buckets with test data
-    const omicsRoleAdditionalPolicy = new PolicyStatement({
+    omicsRole.addToPolicy(new PolicyStatement({
       actions: ['s3:Get*', 's3:List*'],
       resources: [
         'arn:aws:s3:::broad-references',
@@ -333,8 +349,7 @@ export class OmicsQuiltStack extends Stack {
         `arn:aws:s3:::omics-${this.cc.region}`,
         `arn:aws:s3:::omics-${this.cc.region}/*`,
       ],
-    });
-    omicsRole.addToPolicy(omicsRoleAdditionalPolicy);
+    }));
     return omicsRole;
   }
 }

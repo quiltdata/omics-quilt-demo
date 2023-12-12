@@ -2,42 +2,18 @@ import json
 import yaml
 import os
 
+from datetime import datetime
 from dotenv import load_dotenv
 from tempfile import TemporaryDirectory
 from typing import Any, Generator
 from pathlib import Path
 from upath import UPath
-from aws_lambda_powertools.utilities.typing import LambdaContext
-from dataclasses import dataclass, field
+
+from .types import KEYED
+from .ssm_parameter_store import SSMParameterStore
 
 
 load_dotenv("../../.env")
-
-KEYED = dict[str, Any]
-SKEYED = dict[str, str]
-
-
-@dataclass
-class ClientContext:
-    client: Any = None
-    custom: Any = None
-    env: dict[str, str] = field(default_factory=dict)
-
-
-@dataclass
-class PseudoContext(LambdaContext):
-    function_name: str = "test"
-    function_version: str = "1"
-    memory_limit_in_mb: int = 128
-    aws_request_id: str = "test"
-    log_group_name: str = "test"
-    log_stream_name: str = "test"
-    identity: Any = None
-    client_context: ClientContext | None = None  # type: ignore
-
-    def __init__(self, env: SKEYED) -> None:
-        self.client_context = ClientContext()
-        self.client_context.env = env
 
 
 class Constants:
@@ -140,6 +116,7 @@ class Constants:
         self.app = self.get("APP_NAME")
         self.account = self.get("CDK_DEFAULT_ACCOUNT", "AWS_ACCOUNT_ID")
         self.region = self.get("CDK_DEFAULT_REGION", "AWS_DEFAULT_REGION")
+        self.ssm = SSMParameterStore(self.app, self.region)
 
     def to_dict(self) -> KEYED:
         return {
@@ -184,5 +161,17 @@ class Constants:
     def get_ecr_registry(self) -> str:
         return f"{self.account}.dkr.ecr.{self.region}.amazonaws.com"
 
-    def get_parameter_name(self, name: str) -> str:
-        return f"/vivos/{self.app}/{name}"
+    def timeout(self) -> int:
+        return int(self.get("TIMEOUT"))
+
+    def check_time(self, key: str) -> bool:
+        now = round(datetime.now().timestamp())
+        if key in self.ssm:
+            prior = int(self.ssm[key])
+            delta = now - prior
+            timeout = self.timeout()
+            if delta < timeout:
+                print(f"Too soon: {delta} < {timeout}")
+                return False
+        self.ssm[key] = str(now)
+        return True

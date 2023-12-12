@@ -4,9 +4,10 @@ from gsalib import GatkReport  # type: ignore
 from pathlib import Path
 from quilt3 import Package  # type: ignore
 from typing import Any, TYPE_CHECKING
-from upath import UPath
 
-from .constants import Constants, KEYED
+from .types import KEYED
+
+from .constants import Constants
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -16,7 +17,12 @@ else:
 LOG_STREAM = "OmicsQuiltDemo-{:0>4d}{:0>2d}{:0>2d}"
 
 
-class Handler:
+class GSAHandler:
+    @staticmethod
+    def ReportRoot(report_uri: str) -> Path:
+        report_path = Constants.ToPath(report_uri)
+        return report_path.parent  # WAS: .parent.parent
+
     @staticmethod
     def ParseURI(file_uri: str) -> KEYED:
         # file_uri = s3://bucket/pkg/name/.../sentinel_file
@@ -42,34 +48,43 @@ class Handler:
 
     def handleEvent(self, event: KEYED) -> KEYED:
         opts = self.parseEvent(event)
-        print(opts)
+        body = {
+            "message": "N/A",
+            "event": event,
+            "opts": opts,
+        }
+        print(f"handleEvent.opts: {opts}")
+        ready = self.cc.check_time(opts["key"])
+        if not ready:
+            body["message"] = "Not ready"
+            return {
+                "statusCode": 200,
+                "body": body,
+            }
         if not opts.get("type"):
+            body["message"] = "ERROR: No type"
             return {
                 "statusCode": 400,  # Bad Request
-                "body": "No type",
+                "body": body,
             }
         if opts["type"] != "ObjectCreated:Put":
+            body["message"] = f"ERROR: Bad type: {opts['type']}"
             return {
                 "statusCode": 404,  # Not Found
-                "body": "No action",
+                "body": body,
             }
 
         report_uri = f"s3://{opts['bucket']}/{opts['key']}"
-        report_path = UPath(report_uri)
-        root = report_path.parent.parent.parent
-        meta = opts
+        root = self.ReportRoot(report_uri)
+        print(f"handleEvent.root: {root}")
         if not opts.get("debug"):
             tables = self.downloadReport(report_uri, root)
             self.summarizeTables(tables, root)
-            meta = self.packageFolder(root, opts)
+            body["opts"] = self.packageFolder(root, opts)
+            body["message"] = f"{report_uri} @ {root}"
         return {
-            "statusCode": 200,
-            "body": {
-                "root": str(root),
-                "report": report_uri,
-                "meta": meta,
-                "event": event,
-            },
+            "statusCode": 201,
+            "body": body,
         }
 
     def parseEvent(self, event: KEYED) -> KEYED:
@@ -87,16 +102,15 @@ class Handler:
             "type": record["eventName"],
             "bucket": s3["bucket"]["name"],
             "key": key,
-            "package": Constants.GetPackageName(UPath(key)),
+            "package": Constants.GetPackageName(Path(key)),
             "debug": record.get("debug", False),
         }
 
     def downloadReport(self, report_uri: str, root: Path) -> KEYED:
         for temp_path in Constants.DownloadURI(report_uri):
-            print(temp_path)
             if temp_path.exists():
                 report = GatkReport(str(temp_path))
-                root = Path(report_uri).parent.parent.parent
+                root = self.ReportRoot(report_uri)
                 return self.downloadTables(report, root)
         return {}
 
@@ -104,16 +118,16 @@ class Handler:
         tables = {}
         for name, table in report.tables.items():
             dest = root / f"{name}.csv"
-            print(dest)
+            print(f"downloadTables: {name} -> {dest}")
             table.to_csv(dest)
             tables[name] = str(dest)
         return tables
 
     def summarizeTables(self, tables: KEYED, root: Path) -> Path:
-        names = list(tables.keys())
-        name_string = json.dumps(names, ensure_ascii=True)
+        files = list(tables.values())
+        filename_list = json.dumps(files, ensure_ascii=True)
         sum: Path = root / self.cc.get("QUILT_SUMMARIZE")
-        sum.write_text(name_string)
+        sum.write_text(filename_list)
         return sum
 
     def packageFolder(self, root: Path, opts: KEYED) -> KEYED:
@@ -131,20 +145,19 @@ class Handler:
         meta["options"] = opts
         meta["context"] = self.context
 
-        print(f"meta: {meta}")
-
         root_folder = str(root)
-        print(root_folder)
         pkg.set_dir(".", path=root_folder)
         pkg.set_meta(meta)
 
+        print(f"packageFolder.opts: {opts}")
         new_pkg = pkg.push(
             opts["package"],
             registry=f"s3://{opts['bucket']}",
             message=json.dumps(opts, ensure_ascii=True),
             force=True,
         )
-        print(new_pkg)
+        print(f"packageFolder.new_pkg: {new_pkg}")
         meta["top_hash"] = new_pkg.top_hash
         meta["quilt+uri"] = f"{base_uri}@{new_pkg.top_hash}"
+        print(f"packageFolder.meta: {meta}")
         return meta

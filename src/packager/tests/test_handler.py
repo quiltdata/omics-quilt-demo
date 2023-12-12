@@ -3,7 +3,7 @@ import os
 import pytest
 from datetime import datetime
 
-from packager import Handler
+from packager import GSAHandler
 from tempfile import TemporaryDirectory
 
 # from unittest.mock import MagicMock, patch
@@ -13,7 +13,7 @@ from .conftest import CTX
 
 @pytest.fixture
 def handler():
-    return Handler({})
+    return GSAHandler({})
 
 
 @pytest.fixture

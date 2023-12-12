@@ -42,7 +42,7 @@ def test_valid_type(ctx, event):
     result = handler(event, ctx)
     assert result
     print(record)
-    assert result["statusCode"] == 200
+    assert result["statusCode"] == 201
     body = result["body"]
     assert body
     print(body)
