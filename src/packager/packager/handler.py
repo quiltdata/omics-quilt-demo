@@ -42,7 +42,7 @@ class Handler:
 
     def handleEvent(self, event: KEYED) -> KEYED:
         opts = self.parseEvent(event)
-        print(opts)
+        print(f"handleEvent.opts: {opts}")
         if not opts.get("type"):
             return {
                 "statusCode": 400,  # Bad Request
@@ -57,7 +57,7 @@ class Handler:
         report_uri = f"s3://{opts['bucket']}/{opts['key']}"
         report_path = UPath(report_uri)
         root = report_path.parent.parent.parent
-        print(f"root: {root}")
+        print(f"handleEvent.root: {root}")
         meta = opts
         if not opts.get("debug"):
             tables = self.downloadReport(report_uri, root)
@@ -94,7 +94,6 @@ class Handler:
 
     def downloadReport(self, report_uri: str, root: Path) -> KEYED:
         for temp_path in Constants.DownloadURI(report_uri):
-            print(temp_path)
             if temp_path.exists():
                 report = GatkReport(str(temp_path))
                 report_path = Constants.ToPath(report_uri)
@@ -106,7 +105,7 @@ class Handler:
         tables = {}
         for name, table in report.tables.items():
             dest = root / f"{name}.csv"
-            print(dest)
+            print(f"downloadTables: {name} -> {dest}")
             table.to_csv(dest)
             tables[name] = str(dest)
         return tables
@@ -133,10 +132,9 @@ class Handler:
         meta["options"] = opts
         meta["context"] = self.context
 
-        print(f"meta: {meta}")
+        print(f"packageFolder.meta: {meta}")
 
         root_folder = str(root)
-        print(root_folder)
         pkg.set_dir(".", path=root_folder)
         pkg.set_meta(meta)
 
@@ -146,7 +144,7 @@ class Handler:
             message=json.dumps(opts, ensure_ascii=True),
             force=True,
         )
-        print(new_pkg)
         meta["top_hash"] = new_pkg.top_hash
         meta["quilt+uri"] = f"{base_uri}@{new_pkg.top_hash}"
+        print(f"packageFolder.meta: {meta}")
         return meta
