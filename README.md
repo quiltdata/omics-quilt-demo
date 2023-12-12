@@ -7,6 +7,8 @@ Use CDK to create Quilt packages from AWS HealthOmics
 ```bash
 cp example.env .env # and edit
 aws configure list-profiles # ensure it is setup properly
+npx npm install
+npm install yarn -g
 yarn install
 npx cdk bootstrap # if not yet done for this account/region
 npm run deploy
