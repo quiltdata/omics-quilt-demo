@@ -26,13 +26,15 @@ You will also need to accept the Subscription from your email client.
 
 Use your Quilt Catalog to browse the inputs and outputs
 
-1. Go to Console and find the Omics-Quilt stack
+1. Go to AWS Console and find the Omics-Quilt stack
 2. Copy names of the INPUT and OUTPUT buckets
-3. Copy the RegistryRoleARN
+3. Copy the Status Topic ARN?!?
 4. Go your Quilt Catalog
 5. Click "+" on the front page (or Admin Settings -> Buckets)
 6. Click "+" in the upper right corner to add a new bucket
-7. For each bucket, enter the name and ARN
+   1. Name: Physical Name from Stack
+   2. Title: Omics Quilt Input / Output
+   3. SNS Topic ARN
 
 ### Run the Workflow
 
@@ -40,6 +42,8 @@ Use your Quilt Catalog to browse the inputs and outputs
 2. Go to Console and find the input bucket
 3. Create Folders `fastq` and, inside that, `<region>`
 4. Upload the JSON file to `s3://<input-bucket>/fastq/<region>/<region>.json`
+
+TODO: Setup a Quilt package push that does this for you
 
 ### View the Results
 
