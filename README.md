@@ -11,7 +11,7 @@ Use CDK to create and deploy the stack.
 ```bash
 cp example.env .env # and edit
 aws configure list-profiles # verify AWS credentials exist
-npx npm install # if npm not present (but npx is)
+# npx npm install # if npm not present (but npx is)
 npm install yarn -g # if yarn not present (but npm is)
 yarn install
 npx cdk bootstrap # if not yet done for this account/region
@@ -21,6 +21,18 @@ npm run deploy
 ```
 
 You will also need to accept the Subscription from your email client.
+
+#### Note: macOS fails on docker-credential-helper
+
+If running on macOS, you will get an error for `docker-credentials-helper`.
+You will need to install and alias that and the `docker-credential-desktop` helper.
+
+```bash
+brew install docker-credential-helper
+cd /opt/homebrew/bin
+ln -s docker-credential-osxkeychain docker-credential-helper
+ln -s docker-credential-osxkeychain docker-credential-desktop
+```
 
 ### Quilt Integration
 
