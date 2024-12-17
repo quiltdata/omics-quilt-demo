@@ -39,14 +39,14 @@ ln -s docker-credential-osxkeychain docker-credential-desktop
 Use your Quilt Catalog to browse the inputs and outputs
 
 1. Go to AWS Console and find the Omics-Quilt stack
-2. Copy names of the INPUT and OUTPUT buckets
-3. Copy the Status Topic ARN?!?
-4. Go your Quilt Catalog
-5. Click "+" on the front page (or Admin Settings -> Buckets)
-6. Click "+" in the upper right corner to add a new bucket
+   1. Copy names of the INPUT and OUTPUT buckets
+   2. Copy the SNS Topic ARN, with type "AWS::SNS::Topic", e.g. `arn:aws:sns:us-east-1:1234567890:omics-quilt-status-topic`
+2. Go your Quilt Catalog
+3. Click "+" on the front page (or Admin Settings -> Buckets)
+4. Click "+" in the upper right corner to add a new bucket
    1. Name: Physical Name from Stack
    2. Title: Omics Quilt Input / Output
-   3. SNS Topic ARN
+   3. SNS Topic ARN (under Indexing and Notifications)
 
 ### Run the Workflow
 
@@ -54,6 +54,8 @@ Use your Quilt Catalog to browse the inputs and outputs
 2. Go to Console and find the input bucket
 3. Create Folders `fastq` and, inside that, `<region>`
 4. Upload the JSON file to `s3://<input-bucket>/fastq/<region>/<region>.json`
+
+If it already exists, set the timestamp to a future time to trigger a new run.
 
 TODO: Setup a Quilt package push that does this for you
 
