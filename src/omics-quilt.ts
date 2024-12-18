@@ -150,17 +150,15 @@ export class OmicsQuiltStack extends Stack {
   }
 
   private makeOmicsEventRule(ruleName: string) {
-    const ruleOmics = new Rule(this, ruleName,
-      {
-        eventPattern: {
-          source: ['aws.omics'],
-          detailType: ['Run Status Change'],
-          detail: {
-            status: ['*'],
-          },
+    const ruleOmics = new Rule(this, ruleName, {
+      eventPattern: {
+        source: ['aws.omics'],
+        detailType: ['Run Status Change'],
+        detail: {
+          status: ['PENDING', 'STARTING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED', 'STOPPING', 'DELETED'],
         },
       },
-    );
+    });
     return ruleOmics;
   }
 
@@ -232,6 +230,7 @@ export class OmicsQuiltStack extends Stack {
     const output = ['s3:/', this.outputBucket.bucketName, this.cc.app];
     const input = ['s3:/', this.inputBucket.bucketName, this.manifest_prefix];
     const final_env = {
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       ECR_REGISTRY: this.cc.getEcrRegistry(),
       INPUT_S3_LOCATION: input.join('/'),
       LOG_LEVEL: 'ALL',
