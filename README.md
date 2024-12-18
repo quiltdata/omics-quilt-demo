@@ -7,6 +7,7 @@ Use CDK to create Quilt packages from AWS HealthOmics
 ### Installation
 
 Use CDK to create and deploy the stack.
+Note that it requires a large Cloud9 instance to run Docker.
 
 ```bash
 cp example.env .env # and edit
