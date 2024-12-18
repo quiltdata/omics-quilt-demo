@@ -1,6 +1,6 @@
 import { awscdk } from 'projen';
 
-const cdkVersion = '2.114.1';
+const cdkVersion = '2.173.2';
 const solutionName = 'omics-quilt-demo';
 const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: cdkVersion,
