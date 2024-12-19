@@ -1,7 +1,7 @@
 import * as python from '@aws-cdk/aws-lambda-python-alpha';
 import { Duration, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
 import { Rule } from 'aws-cdk-lib/aws-events';
-import { SnsTopic } from 'aws-cdk-lib/aws-events-targets';
+import { SnsTopic, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import {
   AccountPrincipal,
   ArnPrincipal,
@@ -11,12 +11,10 @@ import {
   ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { S3EventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import {
   Bucket,
   BlockPublicAccess,
-  EventType,
   BucketEncryption,
 } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -89,23 +87,41 @@ export class OmicsQuiltStack extends Stack {
     const fastqLambda = this.makeLambda('fastq', {});
     this.makeParameter('FASTQ_LAMBDA_ARN', fastqLambda.functionArn);
     // Add S3 event source to Lambda
-    const fastqTrigger = new S3EventSource(this.inputBucket, {
-      events: [EventType.OBJECT_CREATED],
-      filters: [
-        { prefix: this.manifest_prefix, suffix: this.manifest_suffix },
-      ],
-    });
-    fastqLambda.addEventSource(fastqTrigger);
-
     const packagerLambda = this.makePythonLambda('packager', {});
     // TODO: trigger on Omics completion event, not report file
-    const packagerTrigger = new S3EventSource(this.outputBucket, {
-      events: [EventType.OBJECT_CREATED],
-      filters: [
-        { prefix: this.packager_prefix, suffix: this.packager_suffix },
-      ],
+
+    // Create EventBridge rule to trigger Lambda function
+    const fastqRule = new Rule(this, 'FastqRule', {
+      eventPattern: {
+        source: ['aws.s3'],
+        detailType: ['Object Created'],
+        detail: {
+          bucket: {
+            name: [this.inputBucket.bucketName],
+          },
+          object: {
+            key: [{ prefix: this.manifest_prefix, suffix: this.manifest_suffix }],
+          },
+        },
+      },
     });
-    packagerLambda.addEventSource(packagerTrigger);
+    fastqRule.addTarget(new LambdaFunction(fastqLambda));
+
+    const packagerRule = new Rule(this, 'PackagerRule', {
+      eventPattern: {
+        source: ['aws.s3'],
+        detailType: ['Object Created'],
+        detail: {
+          bucket: {
+            name: [this.outputBucket.bucketName],
+          },
+          object: {
+            key: [{ prefix: this.packager_prefix, suffix: this.packager_suffix }],
+          },
+        },
+      },
+    });
+    packagerRule.addTarget(new LambdaFunction(packagerLambda));
   }
 
   private makeParameter(name: string, value: any) {
@@ -188,6 +204,7 @@ export class OmicsQuiltStack extends Stack {
       enforceSSL: true,
       removalPolicy: RemovalPolicy.DESTROY,
       versioned: true,
+      eventBridgeEnabled: true,
     };
     const bucket = new Bucket(this, name, bucketOptions);
     bucket.grantDelete(this.principal);
