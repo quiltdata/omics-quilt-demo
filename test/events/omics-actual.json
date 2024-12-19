@@ -1,0 +1,17 @@
+{
+    "version": "0",
+    "id": "aa2051a2-b73a-36b4-c488-0346cb7f36ad",
+    "detail-type": "Run Status Change",
+    "source": "aws.omics",
+    "account": "123456789012",
+    "time": "2024-12-19T00:04:50Z",
+    "region": "us-east-1",
+    "resources": ["arn:aws:omics:us-east-1:123456789012:run/3395667"],
+    "detail": {
+        "omicsVersion": "1.0.0",
+        "arn": "arn:aws:omics:us-east-1:123456789012:run/3395667",
+        "status": "COMPLETED",
+        "uuid": "ccc9edf5-40b6-b07f-af6c-93ec4b77e2e0",
+        "runOutputUri": "s3://omics-quilt-omicsquiltckaoutput123456789012useast1-gpux2jtjucm8/omics-quilt/3395667"
+    }
+}
