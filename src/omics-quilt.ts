@@ -52,7 +52,8 @@ export class OmicsQuiltStack extends Stack {
 
   public readonly manifest_prefix: string;
   public readonly manifest_suffix: string;
-  public readonly packager_sentinel: string;
+  public readonly packager_prefix: string;
+  public readonly packager_suffix: string;
 
   readonly cc: Constants;
   readonly lambdaRole: Role;
@@ -66,7 +67,8 @@ export class OmicsQuiltStack extends Stack {
     const manifest_root = this.cc.get('MANIFEST_ROOT');
     this.manifest_prefix = `${manifest_root}/${this.cc.region}`;
     this.manifest_suffix = this.cc.get('MANIFEST_SUFFIX');
-    this.packager_sentinel = this.cc.get('FASTQ_SENTINEL');
+    this.packager_prefix = this.cc.get('FASTQ_PREFIX');
+    this.packager_suffix = this.cc.get('FASTQ_SUFFIX');
 
     // Create Input/Output S3 buckets
     this.inputBucket = this.makeBucket('input');
@@ -100,7 +102,7 @@ export class OmicsQuiltStack extends Stack {
     const packagerTrigger = new S3EventSource(this.outputBucket, {
       events: [EventType.OBJECT_CREATED],
       filters: [
-        { suffix: this.packager_sentinel },
+        { prefix: this.packager_prefix, suffix: this.packager_suffix },
       ],
     });
     packagerLambda.addEventSource(packagerTrigger);
@@ -148,17 +150,15 @@ export class OmicsQuiltStack extends Stack {
   }
 
   private makeOmicsEventRule(ruleName: string) {
-    const ruleOmics = new Rule(this, ruleName,
-      {
-        eventPattern: {
-          source: ['aws.omics'],
-          detailType: ['Run Status Change'],
-          detail: {
-            status: ['*'],
-          },
+    const ruleOmics = new Rule(this, ruleName, {
+      eventPattern: {
+        source: ['aws.omics'],
+        detailType: ['Run Status Change'],
+        detail: {
+          status: ['PENDING', 'STARTING', 'RUNNING', 'COMPLETED', 'FAILED', 'CANCELLED', 'STOPPING', 'DELETED'],
         },
       },
-    );
+    });
     return ruleOmics;
   }
 
@@ -230,12 +230,14 @@ export class OmicsQuiltStack extends Stack {
     const output = ['s3:/', this.outputBucket.bucketName, this.cc.app];
     const input = ['s3:/', this.inputBucket.bucketName, this.manifest_prefix];
     const final_env = {
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       ECR_REGISTRY: this.cc.getEcrRegistry(),
       INPUT_S3_LOCATION: input.join('/'),
       LOG_LEVEL: 'ALL',
       OMICS_ROLE: this.omicsRole.roleArn,
       OUTPUT_S3_LOCATION: output.join('/'),
-      SENTINEL_FILE: this.packager_sentinel,
+      SENTINEL_PREFIX: this.packager_prefix,
+      SENTINEL_SUFFIX: this.packager_suffix,
       INPUT_METADATA: this.cc.get('INPUT_METADATA'),
       QUILT_METADATA: this.cc.get('QUILT_METADATA'),
       WORKFLOW_ID: this.cc.get('READY2RUN_WORKFLOW_ID'),

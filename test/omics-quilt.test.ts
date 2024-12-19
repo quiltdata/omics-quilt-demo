@@ -18,13 +18,13 @@ describe('OmicsQuiltStack', () => {
     // Prepare the stack for assertions.
     const template = Template.fromStack(omicsWorkflowStack);
 
-    // Assert it creates the functiona with the correct properties...
-    // TBD: can we verify it properly loaded the lambda code?
+    // First, simple verify it created the function.
     template.hasResourceProperties('AWS::Lambda::Function', {
       Handler: 'index.handler',
       Runtime: 'nodejs18.x',
     });
 
+    // Verify it creates the function with the correct properties...
     template.hasResourceProperties('AWS::Lambda::Function', {
       Handler: 'index.handler',
       Runtime: 'nodejs18.x',

@@ -7,14 +7,17 @@ Use CDK to create Quilt packages from AWS HealthOmics
 ### Installation
 
 Use CDK to create and deploy the stack.
+Note that it requires a large Cloud9 instance to run Docker.
 
 ```bash
 cp example.env .env # and edit
+source .env
 aws configure list-profiles # verify AWS credentials exist
 # npx npm install # if npm not present (but npx is)
 npm install yarn -g # if yarn not present (but npm is)
 yarn install
-npx cdk bootstrap # if not yet done for this account/region
+# set bootstrap region (if new or changed)
+npx cdk bootstrap aws://$CDK_DEFAULT_ACCOUNT/$CDK_DEFAULT_REGION
 # start Docker if not already running
 sudo systemctl start docker # e.g. on Linux (requires large Cloud9 instance!)
 npm run deploy

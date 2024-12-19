@@ -21,14 +21,13 @@ class Constants:
         "APP_NAME": "packager",
         "CDK_DEFAULT_EMAIL": "test@example.com",
         "CDK_DEFAULT_REGION": "us-east-1",
-        "SENTINEL_BUCKET": "data-yaml-spec-tests",
-        "SENTINEL_FILE": "quilt_metadata.json",
+        # "SENTINEL_BUCKET": "data-yaml-spec-tests",
+        # "SENTINEL_FILE": "quilt_metadata.json",
         "TIMESTAMP_FILE": "quilt_timestamp.json",
         "SOURCE_APP": "omics-quilt",
         "QUILT_METADATA": "quilt_metadata.json",
         "INPUT_METADATA": "input_metadata.json",
         "QUILT_SUMMARIZE": "quilt_summarize.json",
-        "FASTQ_SENTINEL": "out/bqsr_report/NA12878.hg38.recal_data.csv",
     }
 
     @classmethod

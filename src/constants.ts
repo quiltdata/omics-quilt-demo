@@ -20,7 +20,8 @@ export class Constants {
     MANIFEST_SUFFIX: '.json',
     INPUT_METADATA: 'input_metadata.json',
     QUILT_METADATA: 'quilt_metadata.json',
-    FASTQ_SENTINEL: 'out/bqsr_report/NA12878.hg38.recal_data.csv',
+    FASTQ_PREFIX: 'out/bqsr_report/',
+    FASTQ_SUFFIX: '.hg38.recal_data.csv',
     MEMORY_SIZE: 8192,
     TIMEOUT: '900',
   };

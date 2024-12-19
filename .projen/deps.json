@@ -21,7 +21,7 @@
     },
     {
       "name": "aws-cdk",
-      "version": "^2.114.1",
+      "version": "^2.173.2",
       "type": "build"
     },
     {
@@ -68,7 +68,7 @@
     },
     {
       "name": "@aws-cdk/aws-lambda-python-alpha",
-      "version": "^2.114.1-alpha.0",
+      "version": "^2.173.2-alpha.0",
       "type": "runtime"
     },
     {
@@ -93,7 +93,7 @@
     },
     {
       "name": "aws-cdk-lib",
-      "version": "^2.114.1",
+      "version": "^2.173.2",
       "type": "runtime"
     },
     {

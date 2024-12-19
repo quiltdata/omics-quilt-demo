@@ -29,7 +29,7 @@
     "@types/node": "^18",
     "@typescript-eslint/eslint-plugin": "^6",
     "@typescript-eslint/parser": "^6",
-    "aws-cdk": "^2.121.1",
+    "aws-cdk": "^2.173.2",
     "esbuild": "~0.21",
     "eslint": "^8",
     "eslint-import-resolver-typescript": "^3.6.1",
@@ -42,15 +42,15 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@aws-cdk/aws-lambda-python-alpha": "^2.121.1-alpha.0",
+    "@aws-cdk/aws-lambda-python-alpha": "^2.173.2-alpha.0",
     "@aws-sdk/client-omics": "^3.490.0",
     "@aws-sdk/client-s3": "^3.490.0",
     "@aws-sdk/client-sns": "^3.490.0",
     "@types/js-yaml": "^4.0.9",
     "@types/uuid": "^9.0.7",
-    "aws-cdk-lib": "^2.121.1",
+    "aws-cdk-lib": "^2.173.2",
     "aws-lambda": "^1.0.7",
-    "constructs": "^10.3.0",
+    "constructs": "^10.0.5",
     "dotenv": "^16.3.1",
     "handlebars": "^4.7.8",
     "js-yaml": "^4.1.0",
@@ -91,10 +91,8 @@
         }
       ]
     ],
-    "preset": "ts-jest",
-    "globals": {},
     "transform": {
-      "\\.ts$": [
+      "^.+\\.[t]sx?$": [
         "ts-jest",
         {
           "tsconfig": "tsconfig.dev.json"

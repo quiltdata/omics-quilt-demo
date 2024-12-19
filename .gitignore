@@ -36,7 +36,6 @@ test/__snapshots__/*
 __pycache__
 *.pyc
 *_metadata.json
-!/.projenrc.js
 /test-reports/
 junit.xml
 /coverage/
@@ -56,4 +55,4 @@ junit.xml
 /cdk.out/
 .cdk.staging/
 .parcel-cache/
-package-lock.json
+!/.projenrc.ts

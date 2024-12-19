@@ -1,6 +1,6 @@
 import { awscdk } from 'projen';
 
-const cdkVersion = '2.114.1';
+const cdkVersion = '2.173.2';
 const solutionName = 'omics-quilt-demo';
 const project = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: cdkVersion,
@@ -35,7 +35,6 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   ],
 });
 override_file_key('.github/workflows/build.yml', 'jobs.build.env');
-fix_deprecation_warning();
 /*
 const appTestTask = project.addTask('pytest', {
   cwd: 'src/packager',
@@ -57,14 +56,4 @@ function override_file_key(file: string, key: string) {
   opts.CDK_DEFAULT_REGION = opts.AWS_DEFAULT_REGION;
 
   project.tryFindObjectFile(file)?.addOverride(key, opts);
-}
-
-// Fix Jest 29 warning about deprecated config in `globals`
-function fix_deprecation_warning() {
-  project.jest!.config.transform ??= {};
-  project.jest!.config.transform['\\.ts$'] = [
-    'ts-jest',
-    project.jest?.config.globals['ts-jest'],
-  ];
-  delete project.jest!.config.globals['ts-jest'];
 }
