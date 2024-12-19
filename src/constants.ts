@@ -214,6 +214,10 @@ export class Constants {
     this.region = this.get('CDK_DEFAULT_REGION') || this.get('AWS_DEFAULT_REGION');
   }
 
+  public getContext(): any {
+    return this.context;
+  }
+
   public toDict(): KeyedConfig {
     return {
       app: this.app,
