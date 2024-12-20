@@ -53,7 +53,7 @@ class GSAHandler:
             "opts": opts,
         }
         print(f"handleEvent.opts: {opts}")
-        ready = (not opts["debug"]) and self.cc.check_time(opts["uri"])
+        ready = opts["debug"] or self.cc.check_time(opts["uri"])
         if not ready:
             body["message"] = "Not ready"
             return {

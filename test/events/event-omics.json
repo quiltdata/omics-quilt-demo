@@ -6,6 +6,7 @@
     "account": "123456789012",
     "time": "2024-12-19T00:04:50Z",
     "region": "us-east-1",
+    "debug": true,
     "resources": ["arn:aws:omics:us-east-1:123456789012:run/3395667"],
     "detail": {
         "omicsVersion": "1.0.0",
