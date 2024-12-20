@@ -10,6 +10,7 @@ clean:
 
 install:
 	poetry install
+	poetry run mypy --install-types
 
 test: lint
 	poetry run pytest
@@ -17,6 +18,6 @@ test: lint
 watch:
 	poetry run ptw --now .
 
-lint:
+lint: install
 	poetry run mypy packager
 	poetry run black .
