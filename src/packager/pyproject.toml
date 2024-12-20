@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "packager"
-version = "0.1.0"
-description = ""
+version = "0.2.0"
+description = "Python lambda to create Quilt packages"
 authors = ["Dr. Ernie Prabhakar <ernest@quiltdata.io>"]
 readme = "README.md"
 

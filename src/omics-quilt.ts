@@ -223,7 +223,7 @@ export class OmicsQuiltStack extends Stack {
     return new python.PythonFunction(this, name, {
       entry: PYTHON_FOLDER,
       index: PYTHON_INDEX,
-      runtime: Runtime.PYTHON_3_11,
+      runtime: Runtime.PYTHON_3_12,
       role: this.lambdaRole,
       timeout: Duration.seconds(this.cc.timeout()),
       memorySize: this.cc.get('MEMORY_SIZE'),
