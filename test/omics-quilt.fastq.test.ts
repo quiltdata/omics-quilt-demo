@@ -1,11 +1,6 @@
 import { TEST_EVENT } from './fixture';
 import { Constants } from '../src/constants';
-import {
-  save_metadata,
-  fastq_config_from_uri,
-  handler,
-} from '../src/omics-quilt.fastq';
-
+import { handler, OmicsQuiltFastq } from '../src/omics-quilt.fastq';
 
 const CONTEXT = {
   debug: true,
@@ -17,7 +12,9 @@ const CONTEXT = {
 
 describe('fastq_config_from_uri', () => {
   it('should return a single sample', async () => {
-    const sample = await fastq_config_from_uri(CONTEXT.local_file);
+    const sample = await OmicsQuiltFastq.fastq_config_from_uri(
+      CONTEXT.local_file,
+    );
     expect(sample).toBeDefined();
     expect(typeof sample).toEqual('object');
     expect(sample.sample_name).toEqual('NA12878');
@@ -25,8 +22,12 @@ describe('fastq_config_from_uri', () => {
     expect(pairs.length).toEqual(1);
     const pair = pairs[0];
     expect(pair.read_group).toEqual('Sample_U0a');
-    expect(pair.fastq_1).toContain('NA12878/Sample_U0a/U0a_CGATGT_L001_R1_001');
-    expect(pair.fastq_2).toContain('NA12878/Sample_U0a/U0a_CGATGT_L001_R2_001');
+    expect(pair.fastq_1).toContain(
+      'NA12878/Sample_U0a/U0a_CGATGT_L001_R1_001',
+    );
+    expect(pair.fastq_2).toContain(
+      'NA12878/Sample_U0a/U0a_CGATGT_L001_R2_001',
+    );
     expect(pair.platform).toEqual('illumina');
   });
 });
@@ -41,11 +42,12 @@ describe('handler', () => {
 
 describe('save_metadata', () => {
   it('should save metadata successfully', async () => {
+    const omics = new OmicsQuiltFastq(TEST_EVENT, CONTEXT);
     const id = 'output';
     const item = { name: 'Test Item' };
     const cc = new Constants(CONTEXT);
 
-    await save_metadata(id, item, cc);
+    await omics.save_metadata(id, item);
 
     const root = CONTEXT.OUTPUT_S3_LOCATION + '/' + id;
     const metadata_file = cc.get('INPUT_METADATA');
