@@ -86,10 +86,6 @@ export class OmicsQuiltStack extends Stack {
     // Create Lambda function to submit initial HealthOmics workflow
     const fastqLambda = this.makeLambda('fastq', {});
     this.makeParameter('FASTQ_LAMBDA_ARN', fastqLambda.functionArn);
-    // Add S3 event source to Lambda
-    const packagerLambda = this.makePythonLambda('packager', {});
-    // TODO: trigger on Omics completion event, not report file
-
     // Create EventBridge rule to trigger Lambda function
     const fastqRule = new Rule(this, 'FastqRule', {
       eventPattern: {
@@ -107,17 +103,13 @@ export class OmicsQuiltStack extends Stack {
     });
     fastqRule.addTarget(new LambdaFunction(fastqLambda));
 
+    const packagerLambda = this.makePythonLambda('packager', {});
     const packagerRule = new Rule(this, 'PackagerRule', {
       eventPattern: {
-        source: ['aws.s3'],
-        detailType: ['Object Created'],
+        source: ['aws.omics'],
+        detailType: ['Run Status Change'],
         detail: {
-          bucket: {
-            name: [this.outputBucket.bucketName],
-          },
-          object: {
-            key: [{ suffix: this.packager_suffix }], // prefix: this.packager_prefix,
-          },
+          status: ['COMPLETED'],
         },
       },
     });

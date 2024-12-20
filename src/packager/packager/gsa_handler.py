@@ -15,6 +15,7 @@ else:
     LambdaContext = object
 
 LOG_STREAM = "OmicsQuiltDemo-{:0>4d}{:0>2d}{:0>2d}"
+REPORT_SUFFIX = "out/bqsr_report/NA12989.hg38.recal_data.csv"
 
 
 class GSAHandler:
@@ -25,13 +26,13 @@ class GSAHandler:
 
     @staticmethod
     def ParseURI(file_uri: str) -> KEYED:
-        # file_uri = s3://bucket/pkg/name/.../sentinel_file
+        # file_uri = s3://bucket/pkg/name
         splits = file_uri.split("/")
         bucket = splits[2]
         pkg_names = splits[3:4]
         pkg_name = "/".join(pkg_names)
-        filename = splits[-1]
-        return {"bucket": bucket, "pkg_name": pkg_name, "filename": filename}
+        # filename = splits[-1]
+        return {"bucket": bucket, "pkg_name": pkg_name}
 
     @staticmethod
     def GetContext(context: Any) -> KEYED:
@@ -54,7 +55,7 @@ class GSAHandler:
             "opts": opts,
         }
         print(f"handleEvent.opts: {opts}")
-        ready = self.cc.check_time(opts["key"])
+        ready = self.cc.check_time(opts["uri"])
         if not ready:
             body["message"] = "Not ready"
             return {
@@ -67,15 +68,15 @@ class GSAHandler:
                 "statusCode": 400,  # Bad Request
                 "body": body,
             }
-        if opts["type"] != "ObjectCreated:Put":
-            body["message"] = f"ERROR: Bad type: {opts['type']}"
+        if opts["type"] != "Run Status Change":
+            body["message"] = f"ERROR: Bad event type: {opts['type']}"
             return {
                 "statusCode": 404,  # Not Found
                 "body": body,
             }
 
-        report_uri = f"s3://{opts['bucket']}/{opts['key']}"
-        root = self.ReportRoot(report_uri)
+        root = opts['uri']
+        report_uri = f"{root}/{REPORT_SUFFIX}"
         print(f"handleEvent.root: {root}")
         if not opts.get("debug"):
             tables = self.downloadReport(report_uri, root)
@@ -88,22 +89,23 @@ class GSAHandler:
         }
 
     def parseEvent(self, event: KEYED) -> KEYED:
-        records = event["Records"]
-        if len(records) == 0:
-            raise ValueError("No records in event")
-        record = records[0]
-        if "s3" not in record:
-            raise ValueError("No s3 in record")
-        s3 = record["s3"]
-        key = s3["object"]["key"]
+        if "detail" not in event:
+            raise ValueError("No `detail` in event")
+        detail = event["detail"]
+        if "status" not in detail:
+            raise ValueError("No `status` in detail")
+        if "runOutputUri" not in detail:
+            raise ValueError("No `runOutputUri` in detail")
+        uri = detail["runOutputUri"]
         return {
-            "region": record["awsRegion"],
-            "time": record["eventTime"],
-            "type": record["eventName"],
-            "bucket": s3["bucket"]["name"],
-            "key": key,
-            "package": Constants.GetPackageName(Path(key)),
-            "debug": record.get("debug", False),
+            "account": event["account"],
+            "region": event["region"],
+            "source": event["source"],
+            "time": event["time"],
+            "type": event["detail-type"],
+            "package": Constants.GetPackageName(uri),
+            "debug": event.get("debug", False),
+            "uri": uri,
         }
 
     def downloadReport(self, report_uri: str, root: Path) -> KEYED:
@@ -131,7 +133,8 @@ class GSAHandler:
         return sum
 
     def packageFolder(self, root: Path, opts: KEYED) -> KEYED:
-        base_uri = f"quilt+s3://{opts['bucket']}#package={opts['package']}"
+        parsed = self.ParseURI(opts["uri"])
+        base_uri = f"quilt+s3://{parsed['bucket']}#package={parsed['package']}"
         pkg = Package()
         assert root.exists()
         assert root.is_dir()
@@ -156,7 +159,7 @@ class GSAHandler:
         print(f"packageFolder.opts: {opts}")
         new_pkg = pkg.push(
             opts["package"],
-            registry=f"s3://{opts['bucket']}",
+            registry=f"s3://{parsed['bucket']}",
             message=json.dumps(opts, ensure_ascii=True),
             force=True,
         )

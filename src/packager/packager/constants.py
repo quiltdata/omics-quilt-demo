@@ -97,8 +97,9 @@ class Constants:
 
     @staticmethod
     def GetPackageName(file_path: Path) -> str:
-        # first two components of the path
-        return "/".join(file_path.parts[:2])
+        # last two components of the path
+        parts = file_path.parts[-2:]
+        return "/".join(parts)
 
     @classmethod
     def GetRegion(cls) -> str:
