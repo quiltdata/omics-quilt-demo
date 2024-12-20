@@ -1,23 +1,25 @@
 [tool.poetry]
 name = "packager"
-version = "0.1.0"
-description = ""
+version = "0.2.0"
+description = "Python lambda to create Quilt packages"
 authors = ["Dr. Ernie Prabhakar <ernest@quiltdata.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 gsalib = "^1.0.6"
-universal-pathlib = "^0.1.4"
 python-dotenv = "^1.0.0"
 quilt3 = "^5.4.0"
 aws-lambda-powertools = "^2.29.1"
 s3fs = "^2023.12.2"
+aiopath = "^0.7.7"
+universal-pathlib = "^0.2.6"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.3.0"
 mypy = "^1.7.1"
 pytest-watcher = "^0.3.4"
+pytest = "^7.0.1"
 
 [build-system]
 requires = ["poetry-core"]

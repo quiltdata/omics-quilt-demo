@@ -22,19 +22,28 @@ def root():
         yield Path(tempdir)
 
 
+def test_parse_uri(handler):
+    uri = "s3://bucket/pkg/name"
+    opts = handler.ParseURI(uri)
+    print(opts)
+    assert opts is not None
+    assert "bucket" in opts
+    assert "package" in opts
+    assert "bucket" == opts["bucket"]
+    assert "pkg/name" == opts["package"]
+
+
 def test_parse_event(handler):
     event_file = CTX["EVENT"]
     event_path = Path(event_file)
     assert event_path.exists()
     event = json.loads(event_path.read_text())
     assert event is not None
-    assert "Records" in event
+    assert "detail" in event
     opts = handler.parseEvent(event)
     assert opts is not None
-    assert "bucket" in opts
-    assert "key" in opts
-    assert "package" in opts
-    assert "test/omics-quilt-output" == opts["package"]
+    assert "uri" in opts
+    assert "omics-quilt/3395667" == opts["package"]
 
 
 def test_download_report(handler, root):
@@ -68,7 +77,8 @@ def test_package_folder(handler, root):
     assert meta_path.exists()
     options = {
         "bucket": bucket,
-        "package": "test/omics-quilt-demo",
+        "package": "omics-quilt/3395667",
+        "uri": f"s3://{bucket}/omics-quilt/3395667",
     }
     rc = handler.packageFolder(root, options)
     assert rc is not None

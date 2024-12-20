@@ -1,0 +1,25 @@
+{
+  "version": "0",
+  "detail-type": "Object Created",
+  "source": "aws.s3",
+  "account": "850787717197",
+  "time": "2024-01-03T04:54:08Z",
+  "region": "us-east-1",
+  "resources": [
+    "arn:aws:s3:::quilt-demos"
+  ],
+  "detail": {
+    "version": "0",
+    "bucket": {
+      "name": "{{ TEST_BUCKET }}"
+    },
+    "object": {
+      "key": "{{ TEST_KEY }}",
+      "size": 39500,
+      "etag": "8ea16091991a8dd68f4bbec39b6487b1",
+      "version-id": "NL1JktufPyUO1K6oyC2NDCN6T9VGjfz2",
+      "sequencer": "006594E870A834C63D"
+    },
+    "reason": "PutObject"
+  }
+}

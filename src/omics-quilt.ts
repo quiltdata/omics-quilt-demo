@@ -1,7 +1,7 @@
 import * as python from '@aws-cdk/aws-lambda-python-alpha';
 import { Duration, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
 import { Rule } from 'aws-cdk-lib/aws-events';
-import { SnsTopic } from 'aws-cdk-lib/aws-events-targets';
+import { SnsTopic, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import {
   AccountPrincipal,
   ArnPrincipal,
@@ -11,12 +11,10 @@ import {
   ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { S3EventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import {
   Bucket,
   BlockPublicAccess,
-  EventType,
   BucketEncryption,
 } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
@@ -51,8 +49,8 @@ export class OmicsQuiltStack extends Stack {
   public readonly outputBucket: Bucket;
 
   public readonly manifest_prefix: string;
-  public readonly manifest_suffix: string;
-  public readonly packager_prefix: string;
+  // public readonly manifest_suffix: string;
+  // public readonly packager_prefix: string;
   public readonly packager_suffix: string;
 
   readonly cc: Constants;
@@ -66,8 +64,8 @@ export class OmicsQuiltStack extends Stack {
     this.principal = new AccountPrincipal(this.cc.account);
     const manifest_root = this.cc.get('MANIFEST_ROOT');
     this.manifest_prefix = `${manifest_root}/${this.cc.region}`;
-    this.manifest_suffix = this.cc.get('MANIFEST_SUFFIX');
-    this.packager_prefix = this.cc.get('FASTQ_PREFIX');
+    // this.manifest_suffix = this.cc.get('MANIFEST_SUFFIX');
+    // this.packager_prefix = this.cc.get('FASTQ_PREFIX');
     this.packager_suffix = this.cc.get('FASTQ_SUFFIX');
 
     // Create Input/Output S3 buckets
@@ -88,24 +86,34 @@ export class OmicsQuiltStack extends Stack {
     // Create Lambda function to submit initial HealthOmics workflow
     const fastqLambda = this.makeLambda('fastq', {});
     this.makeParameter('FASTQ_LAMBDA_ARN', fastqLambda.functionArn);
-    // Add S3 event source to Lambda
-    const fastqTrigger = new S3EventSource(this.inputBucket, {
-      events: [EventType.OBJECT_CREATED],
-      filters: [
-        { prefix: this.manifest_prefix, suffix: this.manifest_suffix },
-      ],
+    // Create EventBridge rule to trigger Lambda function
+    const fastqRule = new Rule(this, 'FastqRule', {
+      eventPattern: {
+        source: ['aws.s3'],
+        detailType: ['Object Created'],
+        detail: {
+          bucket: {
+            name: [this.inputBucket.bucketName],
+          },
+          object: {
+            key: [{ prefix: this.manifest_prefix }], // , suffix: this.manifest_suffix
+          },
+        },
+      },
     });
-    fastqLambda.addEventSource(fastqTrigger);
+    fastqRule.addTarget(new LambdaFunction(fastqLambda));
 
     const packagerLambda = this.makePythonLambda('packager', {});
-    // TODO: trigger on Omics completion event, not report file
-    const packagerTrigger = new S3EventSource(this.outputBucket, {
-      events: [EventType.OBJECT_CREATED],
-      filters: [
-        { prefix: this.packager_prefix, suffix: this.packager_suffix },
-      ],
+    const packagerRule = new Rule(this, 'PackagerRule', {
+      eventPattern: {
+        source: ['aws.omics'],
+        detailType: ['Run Status Change'],
+        detail: {
+          status: ['COMPLETED'],
+        },
+      },
     });
-    packagerLambda.addEventSource(packagerTrigger);
+    packagerRule.addTarget(new LambdaFunction(packagerLambda));
   }
 
   private makeParameter(name: string, value: any) {
@@ -188,6 +196,7 @@ export class OmicsQuiltStack extends Stack {
       enforceSSL: true,
       removalPolicy: RemovalPolicy.DESTROY,
       versioned: true,
+      eventBridgeEnabled: true,
     };
     const bucket = new Bucket(this, name, bucketOptions);
     bucket.grantDelete(this.principal);
@@ -214,7 +223,7 @@ export class OmicsQuiltStack extends Stack {
     return new python.PythonFunction(this, name, {
       entry: PYTHON_FOLDER,
       index: PYTHON_INDEX,
-      runtime: Runtime.PYTHON_3_11,
+      runtime: Runtime.PYTHON_3_12,
       role: this.lambdaRole,
       timeout: Duration.seconds(this.cc.timeout()),
       memorySize: this.cc.get('MEMORY_SIZE'),
@@ -236,7 +245,7 @@ export class OmicsQuiltStack extends Stack {
       LOG_LEVEL: 'ALL',
       OMICS_ROLE: this.omicsRole.roleArn,
       OUTPUT_S3_LOCATION: output.join('/'),
-      SENTINEL_PREFIX: this.packager_prefix,
+      // SENTINEL_PREFIX: this.packager_prefix,
       SENTINEL_SUFFIX: this.packager_suffix,
       INPUT_METADATA: this.cc.get('INPUT_METADATA'),
       QUILT_METADATA: this.cc.get('QUILT_METADATA'),

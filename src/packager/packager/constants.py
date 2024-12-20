@@ -95,11 +95,6 @@ class Constants:
             file_path.write_text(data)
             yield file_path
 
-    @staticmethod
-    def GetPackageName(file_path: Path) -> str:
-        # first two components of the path
-        return "/".join(file_path.parts[:2])
-
     @classmethod
     def GetRegion(cls) -> str:
         cc = cls({})
@@ -164,7 +159,9 @@ class Constants:
     def timeout(self) -> int:
         return int(self.get("TIMEOUT"))
 
-    def check_time(self, key: str) -> bool:
+    def check_time(self, uri: str) -> bool:
+        # remove prefix from uri
+        key = uri.replace("s3://", "")
         now = round(datetime.now().timestamp())
         if key in self.ssm:
             prior = int(self.ssm[key])

@@ -9,6 +9,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   description: 'Use CDK to create Quilt packages from AWS HealthOmics',
   name: solutionName,
   projenrcTs: true,
+  eslint: true,
   deps: [
     'aws-lambda',
     `@aws-cdk/aws-lambda-python-alpha@^${cdkVersion}-alpha.0`,
@@ -32,6 +33,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '__pycache__', // Python
     '*.pyc', // Python
     '*_metadata.json', // Quilt
+    '/build/', // Makefile
+    'package-lock.json', // Node
   ],
 });
 override_file_key('.github/workflows/build.yml', 'jobs.build.env');
@@ -43,6 +46,7 @@ const appTestTask = project.addTask('pytest', {
 const testTask = project.tasks.tryFind('test');
 testTask?.spawn(appTestTask);
 */
+project.addFields({ version: '0.1.1' });
 project.synth();
 
 

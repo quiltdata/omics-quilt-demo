@@ -36,6 +36,8 @@ test/__snapshots__/*
 __pycache__
 *.pyc
 *_metadata.json
+/build/
+package-lock.json
 /test-reports/
 junit.xml
 /coverage/

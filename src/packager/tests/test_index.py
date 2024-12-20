@@ -14,9 +14,8 @@ def event():
 
 
 def set_type(event, type):
-    record = event["Records"][0]
-    record["eventName"] = type
-    return record
+    event["detail-type"] = type
+    return event["detail"]
 
 
 def test_fixtures(ctx, event):
@@ -37,7 +36,7 @@ def test_bad_type(ctx, event):
 
 
 def test_valid_type(ctx, event):
-    record = set_type(event, "ObjectCreated:Put")
+    record = set_type(event, "Run Status Change")
     record["debug"] = True
     result = handler(event, ctx)
     assert result
