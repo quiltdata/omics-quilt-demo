@@ -26,13 +26,11 @@ class GSAHandler:
 
     @staticmethod
     def ParseURI(file_uri: str) -> KEYED:
-        # file_uri = s3://bucket/pkg/name
         splits = file_uri.split("/")
         bucket = splits[2]
-        pkg_names = splits[3:4]
+        pkg_names = splits[3:5]
         pkg_name = "/".join(pkg_names)
-        # filename = splits[-1]
-        return {"bucket": bucket, "pkg_name": pkg_name}
+        return {"bucket": bucket, "package": pkg_name}
 
     @staticmethod
     def GetContext(context: Any) -> KEYED:
@@ -104,7 +102,7 @@ class GSAHandler:
             "source": event["source"],
             "time": event["time"],
             "type": event["detail-type"],
-            "package": parts["pkg_name"],
+            "package": parts["package"],
             "debug": event.get("debug", False),
             "uri": uri,
         }
@@ -135,7 +133,8 @@ class GSAHandler:
 
     def packageFolder(self, root: Path, opts: KEYED) -> KEYED:
         parsed = self.ParseURI(opts["uri"])
-        base_uri = f"quilt+s3://{parsed['bucket']}#package={parsed['package']}"
+        print(f"packageFolder.parsed: {parsed}")
+        base_uri = f"quilt+s3://{parsed["bucket"]}#package={parsed["package"]}"
         pkg = Package()
         assert root.exists()
         assert root.is_dir()
@@ -160,7 +159,7 @@ class GSAHandler:
         print(f"packageFolder.opts: {opts}")
         new_pkg = pkg.push(
             opts["package"],
-            registry=f"s3://{parsed['bucket']}",
+            registry=f"s3://{parsed["bucket"]}",
             message=json.dumps(opts, ensure_ascii=True),
             force=True,
         )

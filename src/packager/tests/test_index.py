@@ -14,8 +14,8 @@ def event():
 
 
 def set_type(event, type):
-    record = event["Records"][0]
-    record["eventName"] = type
+    record = event["detail"]
+    record["type"] = type
     return record
 
 

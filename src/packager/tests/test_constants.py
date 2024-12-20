@@ -11,7 +11,7 @@ def cc():
 
 def test_constants(cc):
     assert cc
-    assert "data.csv" in cc.get("FASTQ_SUFFIX")
+    assert "packager" in cc.get("APP_NAME")
 
 
 def test_download_object(cc):
