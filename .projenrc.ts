@@ -34,6 +34,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     '*.pyc', // Python
     '*_metadata.json', // Quilt
     '/build/', // Makefile
+    'package-lock.json', // Node
   ],
 });
 override_file_key('.github/workflows/build.yml', 'jobs.build.env');
@@ -45,8 +46,7 @@ const appTestTask = project.addTask('pytest', {
 const testTask = project.tasks.tryFind('test');
 testTask?.spawn(appTestTask);
 */
-project.addFields({version: '0.1.0'});
-project.addFields({environment: {PIP_DISABLE_PIP_VERSION_CHECK: "1"}});
+project.addFields({ version: '0.1.1' });
 project.synth();
 
 
