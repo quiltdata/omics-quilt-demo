@@ -55,7 +55,7 @@ class GSAHandler:
             "opts": opts,
         }
         print(f"handleEvent.opts: {opts}")
-        ready = self.cc.check_time(opts["uri"])
+        ready = (not opts["debug"]) and self.cc.check_time(opts["uri"])
         if not ready:
             body["message"] = "Not ready"
             return {
@@ -75,7 +75,7 @@ class GSAHandler:
                 "body": body,
             }
 
-        root = opts['uri']
+        root = opts["uri"]
         report_uri = f"{root}/{REPORT_SUFFIX}"
         print(f"handleEvent.root: {root}")
         if not opts.get("debug"):
@@ -97,13 +97,14 @@ class GSAHandler:
         if "runOutputUri" not in detail:
             raise ValueError("No `runOutputUri` in detail")
         uri = detail["runOutputUri"]
+        parts = self.ParseURI(uri)
         return {
             "account": event["account"],
             "region": event["region"],
             "source": event["source"],
             "time": event["time"],
             "type": event["detail-type"],
-            "package": Constants.GetPackageName(uri),
+            "package": parts["pkg_name"],
             "debug": event.get("debug", False),
             "uri": uri,
         }
