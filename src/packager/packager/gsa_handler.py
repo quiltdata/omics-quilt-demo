@@ -73,7 +73,7 @@ class GSAHandler:
                 "body": body,
             }
 
-        root = opts["uri"]
+        root = Constants.ToPath(opts["uri"])
         report_uri = f"{root}/{REPORT_SUFFIX}"
         print(f"handleEvent.root: {root}")
         if not opts.get("debug"):
