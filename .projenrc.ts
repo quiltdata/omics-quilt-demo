@@ -9,6 +9,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
   description: 'Use CDK to create Quilt packages from AWS HealthOmics',
   name: solutionName,
   projenrcTs: true,
+  eslint: true,
   deps: [
     'aws-lambda',
     `@aws-cdk/aws-lambda-python-alpha@^${cdkVersion}-alpha.0`,
@@ -44,6 +45,8 @@ const appTestTask = project.addTask('pytest', {
 const testTask = project.tasks.tryFind('test');
 testTask?.spawn(appTestTask);
 */
+project.addFields({version: '0.1.0'});
+project.addFields({environment: {PIP_DISABLE_PIP_VERSION_CHECK: "1"}});
 project.synth();
 
 
