@@ -15,7 +15,7 @@ LAMBDA_BUCKET = $(WRITE_BUCKET)
 all: install test
 
 clean:
-	rm -rf .pytest_cache build
+	rm -rf .pytest_cache build *lock.json
 
 install:
 	poetry install
