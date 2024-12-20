@@ -49,8 +49,8 @@ export class OmicsQuiltStack extends Stack {
   public readonly outputBucket: Bucket;
 
   public readonly manifest_prefix: string;
-  public readonly manifest_suffix: string;
-  public readonly packager_prefix: string;
+  // public readonly manifest_suffix: string;
+  // public readonly packager_prefix: string;
   public readonly packager_suffix: string;
 
   readonly cc: Constants;
@@ -64,8 +64,8 @@ export class OmicsQuiltStack extends Stack {
     this.principal = new AccountPrincipal(this.cc.account);
     const manifest_root = this.cc.get('MANIFEST_ROOT');
     this.manifest_prefix = `${manifest_root}/${this.cc.region}`;
-    this.manifest_suffix = this.cc.get('MANIFEST_SUFFIX');
-    this.packager_prefix = this.cc.get('FASTQ_PREFIX');
+    // this.manifest_suffix = this.cc.get('MANIFEST_SUFFIX');
+    // this.packager_prefix = this.cc.get('FASTQ_PREFIX');
     this.packager_suffix = this.cc.get('FASTQ_SUFFIX');
 
     // Create Input/Output S3 buckets
@@ -100,7 +100,7 @@ export class OmicsQuiltStack extends Stack {
             name: [this.inputBucket.bucketName],
           },
           object: {
-            key: [{ prefix: this.manifest_prefix, suffix: this.manifest_suffix }],
+            key: [{ prefix: this.manifest_prefix }], // , suffix: this.manifest_suffix
           },
         },
       },
@@ -116,7 +116,7 @@ export class OmicsQuiltStack extends Stack {
             name: [this.outputBucket.bucketName],
           },
           object: {
-            key: [{ prefix: this.packager_prefix, suffix: this.packager_suffix }],
+            key: [{ suffix: this.packager_suffix }], // prefix: this.packager_prefix,
           },
         },
       },
@@ -253,7 +253,7 @@ export class OmicsQuiltStack extends Stack {
       LOG_LEVEL: 'ALL',
       OMICS_ROLE: this.omicsRole.roleArn,
       OUTPUT_S3_LOCATION: output.join('/'),
-      SENTINEL_PREFIX: this.packager_prefix,
+      // SENTINEL_PREFIX: this.packager_prefix,
       SENTINEL_SUFFIX: this.packager_suffix,
       INPUT_METADATA: this.cc.get('INPUT_METADATA'),
       QUILT_METADATA: this.cc.get('QUILT_METADATA'),
